@@ -1,20 +1,22 @@
 import { useState } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Route, Routes } from "react-router-dom";
+import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
-import routes from "./routes";
+import ROUTES from "./routes";
+
 import { GlobalStyles } from "./styles/styles";
 
 function App() {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
     return (
         <div>
             <HelmetProvider>
                 <GlobalStyles />
                 <Routes>
                     <Route
-                        path={routes.home}
-                        element={isLoggedIn ? null : <Login />}
+                        path={ROUTES.HOME}
+                        element={isLoggedIn ? <Home /> : <Login />}
                     />
                 </Routes>
             </HelmetProvider>
