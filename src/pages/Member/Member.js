@@ -9,9 +9,9 @@ import WithdrawalMember from "./WithdrawalMember";
 function Member() {
     const { submenuIndex } = useParams();
 
-    console.log(submenuIndex); //TODOS:localstorage에 가지고있기
+    console.log(submenuIndex);
     return (
-        <MainLayout menu={MENU.MEMBER} subMenuIndex={0}>
+        <MainLayout menu={MENU.MEMBER} submenuIndex={submenuIndex}>
             <PageTitle title="회원 관리" />
             {submenuIndex === "0" ? <SearchMembers /> : <WithdrawalMember />}
         </MainLayout>

@@ -94,11 +94,16 @@ const Content = styled.div`
     width: 100%;
     padding: 15px 0px 0px 15px;
 `;
-function MainLayout({ children, menu }) {
+function MainLayout({ children, menu, submenuIndex }) {
     const [curMenuTitle, setCurMenuTitle] = useState(MENUINFO[menu].TITLE);
     const [curSubMenu, setCurSubMenu] = useState(0);
     const [curMenuId, setCurMenuId] = useState(MENUINFO[menu].ID);
 
+    console.log("submenuIndex : ", submenuIndex);
+
+    useEffect(() => {
+        setCurSubMenu(parseInt(submenuIndex));
+    });
     const isCurrentMenu = (index) => {
         const curIndex = MENUINFO[menu].ID;
 
@@ -171,5 +176,6 @@ function MainLayout({ children, menu }) {
 
 MainLayout.propTypes = {
     menu: PropTypes.string.isRequired,
+    submenuIndex: PropTypes.string,
 };
 export default MainLayout;
