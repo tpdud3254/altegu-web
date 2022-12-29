@@ -61,15 +61,15 @@ const MainNav = styled.div`
     font-weight: ${(props) => (props.current ? 600 : 400)};
     text-decoration: ${(props) => (props.current ? "underline" : "none")};
 `;
-const Content = styled.div`
+const Bottom = styled.div`
     display: flex;
     border-top: 1px solid grey;
     margin-top: 10px;
-    height: 83vh;
+    min-height: 83vh;
 `;
 
 const SubNavSideBar = styled.div`
-    border-right: 1px solid grey;
+    /* border-right: 1px solid grey; */
     display: flex;
     flex-direction: column;
     width: 12vw;
@@ -82,7 +82,7 @@ const SubTitle = styled.div`
     padding: 30px 0;
     background-color: lightgrey;
     border-bottom: 1px solid grey;
-    border-right: 1px solid grey;
+    /* border-right: 1px solid grey; */
 `;
 const SubNavs = styled.div`
     width: inherit;
@@ -97,6 +97,9 @@ const SubNav = styled.div`
     //TODOS: 메뉴 선택 시 강조
 `;
 
+const Content = styled.div`
+    border-left: 1px solid grey;
+`;
 function MainLayout({ children, menu }) {
     const [curMenuTitle, setCurMenuTitle] = useState(MENUINFO[menu].TITLE);
 
@@ -111,7 +114,6 @@ function MainLayout({ children, menu }) {
                 <Greeting>안녕하세요. 운영관리자님.</Greeting>
                 <LogoutButton>로그아웃</LogoutButton>
             </Header>
-
             <Wrapper>
                 <MainNavBar>
                     <MainTitle>ATG 관리자 시스템</MainTitle>
@@ -123,7 +125,7 @@ function MainLayout({ children, menu }) {
                         ))}
                     </MainNavs>
                 </MainNavBar>
-                <Content>
+                <Bottom>
                     <SubNavSideBar>
                         <SubTitle>{curMenuTitle}</SubTitle>
                         <SubNavs>
@@ -138,8 +140,8 @@ function MainLayout({ children, menu }) {
                             ))}
                         </SubNavs>
                     </SubNavSideBar>
-                    {children}
-                </Content>
+                    <Content>{children}</Content>
+                </Bottom>
             </Wrapper>
         </Container>
     );
