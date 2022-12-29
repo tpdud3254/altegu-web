@@ -8,16 +8,7 @@ import PropTypes from "prop-types";
 
 import { useEffect, useState } from "react";
 import { MAIN_MENUS, MENU, MENUINFO } from "../../utils/menus";
-
-const subMenus = {
-    HOME: [],
-    MEMBER: ["회원정보 검색", "탈퇴회원 관리"],
-    ORDER: [],
-    SCHEDULE: [],
-    SALES: [],
-    NOTI: [],
-    ETC: [],
-};
+import { Link } from "react-router-dom";
 
 const Container = styled.div`
     margin: 20px;
@@ -94,14 +85,19 @@ const SubNav = styled.div`
     border-bottom: 1px solid lightgrey;
     padding: 10px 5px;
     margin-bottom: 5px;
-    //TODOS: 메뉴 선택 시 강조
+    font-weight: ${(props) => (props.current ? "600" : "400")};
+    color: ${(props) => (props.current ? "black" : "grey")};
 `;
 
 const Content = styled.div`
     border-left: 1px solid grey;
+    width: 100%;
+    padding: 15px 0px 0px 15px;
 `;
 function MainLayout({ children, menu }) {
     const [curMenuTitle, setCurMenuTitle] = useState(MENUINFO[menu].TITLE);
+    const [curSubMenu, setCurSubMenu] = useState(0);
+    const [curMenuId, setCurMenuId] = useState(MENUINFO[menu].ID);
 
     const isCurrentMenu = (index) => {
         const curIndex = MENUINFO[menu].ID;
@@ -119,9 +115,24 @@ function MainLayout({ children, menu }) {
                     <MainTitle>ATG 관리자 시스템</MainTitle>
                     <MainNavs>
                         {MAIN_MENUS.map((menu, index) => (
-                            <MainNav key={index} current={isCurrentMenu(index)}>
-                                {menu}
-                            </MainNav>
+                            <Link
+                                to={
+                                    index === 0
+                                        ? menu.route
+                                        : {
+                                              pathname: `${menu.route}/${curSubMenu}`,
+                                              state: {
+                                                  subMenuIndex: curSubMenu,
+                                              },
+                                          }
+                                }
+                                // state={{ subMenuIndex: 0 }}
+                                key={index}
+                            >
+                                <MainNav current={isCurrentMenu(index)}>
+                                    {menu.name}
+                                </MainNav>
+                            </Link>
                         ))}
                     </MainNavs>
                 </MainNavBar>
@@ -130,13 +141,24 @@ function MainLayout({ children, menu }) {
                         <SubTitle>{curMenuTitle}</SubTitle>
                         <SubNavs>
                             {MENUINFO[menu].SUB_MENUS.map((menu, index) => (
-                                <SubNav key={index}>
-                                    <span>{menu.TITLE}</span>
-                                    <FontAwesomeIcon
-                                        icon={faChevronRight}
-                                        color="grey"
-                                    />
-                                </SubNav>
+                                <Link
+                                    key={index}
+                                    to={{
+                                        pathname: `${MAIN_MENUS[curMenuId].route}/${index}`,
+                                        state: {
+                                            subMenuIndex: index,
+                                        },
+                                    }}
+                                    onClick={() => setCurSubMenu(index)}
+                                >
+                                    <SubNav current={curSubMenu === index}>
+                                        <span>{menu.TITLE}</span>
+                                        <FontAwesomeIcon
+                                            icon={faChevronRight}
+                                            color="grey"
+                                        />
+                                    </SubNav>
+                                </Link>
                             ))}
                         </SubNavs>
                     </SubNavSideBar>

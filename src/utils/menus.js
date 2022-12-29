@@ -1,12 +1,12 @@
 export const MAIN_MENUS = [
-    "Home",
-    "회원관리",
-    "작업관리",
-    "스케줄관리",
-    "포인트관리",
-    "매출/정산",
-    "문의/알림",
-    "기타관리",
+    { name: "Home", route: "/" },
+    { name: "회원관리", route: "/member" },
+    { name: "작업관리", route: "/order" },
+    { name: "스케줄관리", route: "/scehdule" },
+    { name: "포인트관리", route: "/points" },
+    { name: "매출/정산", route: "/sales" },
+    { name: "문의/알림", route: "/noti" },
+    { name: "기타관리", route: "/etc" },
 ];
 
 export const MENU = {

@@ -5,7 +5,7 @@ import { reset } from "styled-reset";
 export const GlobalStyles = createGlobalStyle`
     ${reset}
     input {
-        all:unset //input에 적용된 기본 스타일 리셋
+        /* all:unset //input에 적용된 기본 스타일 리셋 */
     }
 
     * { // * 는 전체 요소에 적용됨

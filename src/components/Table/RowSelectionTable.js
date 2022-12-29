@@ -1,5 +1,6 @@
+import { forwardRef, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { useTable, usePagination } from "react-table";
+import { useTable, usePagination, useRowSelect } from "react-table";
 
 const Styles = styled.div`
     width: 100%;
@@ -37,13 +38,32 @@ const Styles = styled.div`
     }
 `;
 
-function Table({ columns, data }) {
+const IndeterminateCheckbox = forwardRef(({ indeterminate, ...rest }, ref) => {
+    const defaultRef = useRef();
+    const resolvedRef = ref || defaultRef;
+
+    useEffect(() => {
+        resolvedRef.current.indeterminate = indeterminate;
+    }, [resolvedRef, indeterminate]);
+
+    return (
+        <>
+            <input type="checkbox" ref={resolvedRef} {...rest} />
+        </>
+    );
+});
+
+function RowSelectionTable({ columns, data }) {
+    // Use the state and functions returned from useTable to build your UI
     const {
         getTableProps,
         getTableBodyProps,
         headerGroups,
         prepareRow,
-        page,
+        page, // Instead of using 'rows', we'll use page,
+        // which has only the rows for the active page
+
+        // The rest of these things are super handy, too ;)
         canPreviousPage,
         canNextPage,
         pageOptions,
@@ -52,16 +72,46 @@ function Table({ columns, data }) {
         nextPage,
         previousPage,
         setPageSize,
-        state: { pageIndex, pageSize },
+        selectedFlatRows,
+        state: { pageIndex, pageSize, selectedRowIds },
     } = useTable(
         {
             columns,
             data,
             initialState: { pageIndex: 0, pageSize: 5 },
         },
-        usePagination
+        usePagination,
+        useRowSelect,
+        (hooks) => {
+            hooks.visibleColumns.push((columns) => [
+                // Let's make a column for selection
+                {
+                    id: "selection",
+                    // The header can use the table's getToggleAllRowsSelectedProps method
+                    // to render a checkbox
+                    Header: ({ getToggleAllPageRowsSelectedProps }) => (
+                        <div>
+                            <IndeterminateCheckbox
+                                {...getToggleAllPageRowsSelectedProps()}
+                            />
+                        </div>
+                    ),
+                    // The cell can use the individual row's getToggleRowSelectedProps method
+                    // to the render a checkbox
+                    Cell: ({ row }) => (
+                        <div>
+                            <IndeterminateCheckbox
+                                {...row.getToggleRowSelectedProps()}
+                            />
+                        </div>
+                    ),
+                },
+                ...columns,
+            ]);
+        }
     );
 
+    // Render the UI for your table
     return (
         <Styles>
             <table {...getTableProps()}>
@@ -97,10 +147,7 @@ function Table({ columns, data }) {
         Pagination can be built however you'd like. 
         This is just a very basic UI implementation:
       */}
-            <div
-                className="pagination"
-                style={{ width: "100%", textAlign: "center" }}
-            >
+            <div className="pagination">
                 <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
                     {"<<"}
                 </button>{" "}
@@ -134,14 +181,12 @@ function Table({ columns, data }) {
                 >
                     {">>"}
                 </button>{" "}
-                {/*
-                <span>
+                {/* <span>
                     Page{" "}
                     <strong>
-                        {pageIndex + 1} / {pageOptions.length}
+                        {pageIndex + 1} of {pageOptions.length}
                     </strong>{" "}
                 </span>
-                
                 <span>
                     | Go to page:{" "}
                     <input
@@ -156,7 +201,6 @@ function Table({ columns, data }) {
                         style={{ width: "100px" }}
                     />
                 </span>{" "}
-                
                 <select
                     value={pageSize}
                     onChange={(e) => {
@@ -169,9 +213,22 @@ function Table({ columns, data }) {
                         </option>
                     ))}
                 </select> */}
+                <pre>
+                    <code>
+                        {JSON.stringify(
+                            {
+                                selectedRowIds: selectedRowIds,
+                                "selectedFlatRows[].original":
+                                    selectedFlatRows.map((d) => d.original),
+                            },
+                            null,
+                            2
+                        )}
+                    </code>
+                </pre>
             </div>
         </Styles>
     );
 }
 
-export default Table;
+export default RowSelectionTable;

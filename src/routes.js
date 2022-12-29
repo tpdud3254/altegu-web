@@ -1,11 +1,12 @@
 const ROUTES = {
     HOME: "/",
-    MEMBER: "/MEMBER",
-    ORDER: "/ORDER",
-    SCHEDULE: "/SCHEDULE",
-    SALES: "/SALES",
-    NOTI: "/NOTI",
-    ETC: "/ETC",
+    MEMBER: "/member",
+    ORDER: "/order",
+    SCHEDULE: "/scehdule",
+    POINTS: "/points",
+    SALES: "/sales",
+    NOTI: "/noti",
+    ETC: "/etc",
 };
 
 export default ROUTES;
