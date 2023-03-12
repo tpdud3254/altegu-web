@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Route, Routes } from "react-router-dom";
