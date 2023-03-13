@@ -1,0 +1,15 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-alteguweb-dev-234645-authRole",
+      "UnauthRoleArn": "arn:aws:iam::594122140204:role/amplify-alteguweb-dev-234645-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::594122140204:role/amplify-alteguweb-dev-234645-authRole",
+      "Region": "ap-northeast-2",
+      "DeploymentBucketName": "amplify-alteguweb-dev-234645-deployment",
+      "UnauthRoleName": "amplify-alteguweb-dev-234645-unauthRole",
+      "StackName": "amplify-alteguweb-dev-234645",
+      "StackId": "arn:aws:cloudformation:ap-northeast-2:594122140204:stack/amplify-alteguweb-dev-234645/e0c5dd40-c1ad-11ed-963b-022d49a17efe",
+      "AmplifyAppId": "d2w6uidk1xhqli"
+    }
+  }
+}
