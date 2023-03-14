@@ -6,8 +6,12 @@ import Home from "./pages/Home/Home";
 import Login from "./pages/Login/Login";
 import Member from "./pages/Member/Member";
 import ROUTES from "./routes";
-
+// import { withAuthenticator, AmplifySignOut } from "@aws-amplify/ui-react";
+import { Amplify } from "aws-amplify";
+import awsExports from "./aws-exports";
 import { GlobalStyles } from "./styles/styles";
+
+Amplify.configure(awsExports);
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -26,6 +30,7 @@ function App() {
                     />
                 </Routes>
             </HelmetProvider>
+            {/* <AmplifySignOut /> */}
         </div>
     );
 }
