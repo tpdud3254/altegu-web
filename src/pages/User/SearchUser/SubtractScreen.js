@@ -6,6 +6,7 @@ import {
     GetDateTime,
     GetUserType,
     NumberWithComma,
+    Reload,
 } from "../../../utils/utils";
 import { useMemo } from "react";
 import { SUBTRACT_TABLE_COL } from "./table";
@@ -13,6 +14,8 @@ import Table from "../../../components/Table/Table";
 import { Blank } from "../../../components/Blank";
 import { PointButton } from "../../../components/Button/PointButton";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
+import axios from "axios";
+import { SERVER, VALID } from "../../../contant";
 
 const Container = styled.div`
     width: 100%;
@@ -42,6 +45,7 @@ const Buttons = styled.div`
 function SubtractScreen({ data, onClose }) {
     const [tableData, setTableData] = useState(null);
     const [block, setBlock] = useState(false);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         const init = async () => {
@@ -102,12 +106,53 @@ function SubtractScreen({ data, onClose }) {
     };
 
     const onSubtract = async () => {
+        setProcessing(true);
         if (block) {
             alert("보유 포인트가 부족한 회원이 있습니다.");
             return;
         }
 
-        console.log("ok");
+        try {
+            const pointList = [];
+
+            data.map((user, index) => {
+                const obj = {
+                    id: user.point.id,
+                    point: Number(user.point.curPoint) - 40000,
+                };
+                pointList.push(obj);
+            });
+
+            console.log(pointList);
+
+            const response = await axios.patch(
+                SERVER + "/admin/points/subtract",
+                {
+                    pointList,
+                }
+            );
+
+            const {
+                data: {
+                    data: { points },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(points);
+
+            if (result === VALID) {
+                alert("통신비 차감에 성공하였습니다.");
+                Reload();
+            } else {
+                console.log("onModifyPoint invalid");
+            }
+        } catch (error) {
+            console.log("onModifyPoint error : ", error);
+        } finally {
+            setProcessing(false);
+        }
     };
 
     const columns = useMemo(() => SUBTRACT_TABLE_COL, []);
@@ -124,8 +169,9 @@ function SubtractScreen({ data, onClose }) {
                     type="button"
                     onClick={onSubtract}
                     style={{ backgroundColor: "red", color: "white" }}
+                    disabled={processing}
                 >
-                    차감 진행
+                    {processing ? "차감 중" : "차감 진행"}
                 </PointButton>
                 <Blank />
                 <Blank />

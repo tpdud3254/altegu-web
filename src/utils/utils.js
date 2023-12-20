@@ -63,6 +63,10 @@ export const Reset = (e) => {
     window.location.reload();
 };
 
+export const Reload = () => {
+    window.location.reload();
+};
+
 export const GetPhoneNumberWithDash = (phone) => {
     if (!phone) {
         return "";
