@@ -1,5 +1,5 @@
 // export const SERVER = process.env.REACT_APP_SERVER;
-export const SERVER = "https://9286-218-238-213-154.ngrok-free.app";
+export const SERVER = "https://ed6a-218-238-213-154.ngrok-free.app";
 export const VALID = "VALID";
 
 export const GENDER = { all: null, male: "남", female: "여" };

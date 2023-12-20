@@ -21,6 +21,7 @@ import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import axios from "axios";
 import { SERVER, VALID } from "../../../contant";
 import Modal from "../../../components/Modal";
+import { useForm } from "react-hook-form";
 
 const Container = styled.div`
     width: 100%;
@@ -45,15 +46,23 @@ const Buttons = styled.div`
 `;
 
 function UserDetails({ data, onClose }) {
+    const { register, handleSubmit, setValue, watch, getValues } = useForm();
+
     const [userData, setUserData] = useState(null);
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
 
     const [password, setPassword] = useState("");
+    const [floor, setFloor] = useState([]);
+    const [weight, setWeight] = useState([]);
+    const [selectVehicleType, setSelectVehicleType] = useState(0);
+    const [selectVehicleFloor, setSelectVehicleFloor] = useState(0);
+    const [selectVehicleWeight, setSelectVehicleWeight] = useState(0);
 
     const [showLicenseModal, setShowLicenseModal] = useState(false);
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
+    const [showVehicleModal, setShowVehicleModal] = useState(false);
 
     const [processing, setProcessing] = useState(false);
 
@@ -61,10 +70,10 @@ function UserDetails({ data, onClose }) {
     const vehiclePermissionRef = useRef();
 
     useEffect(() => {
+        getVehicleFloor();
+        getVehicleWeight();
         getUsers(data);
     }, []);
-
-    console.log(password);
 
     const getUsers = async (data) => {
         try {
@@ -149,6 +158,75 @@ function UserDetails({ data, onClose }) {
             }
         });
         return result;
+    };
+
+    const getVehicleFloor = async () => {
+        try {
+            const response = await axios.get(SERVER + "/admin/vehicle/floor", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+            });
+
+            const {
+                data: {
+                    data: { vehicleFloor },
+                },
+            } = response;
+            console.log("getvehicle floor : ", vehicleFloor);
+
+            if (vehicleFloor.length === 0) {
+                setFloor([
+                    "5층 이하",
+                    "6~10층",
+                    "11~15층",
+                    "16~20층",
+                    "21~25층",
+                    "26층 이상",
+                ]);
+            } else {
+                const floordata = [];
+
+                vehicleFloor.map((value) => {
+                    floordata.push(value.floor);
+                });
+
+                setFloor(floordata);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const getVehicleWeight = async () => {
+        try {
+            const response = await axios.get(SERVER + "/admin/vehicle/weight", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+            });
+
+            console.log("getvehicle weight : ", response);
+            const {
+                data: {
+                    data: { vehicleWeight },
+                },
+            } = response;
+
+            if (vehicleWeight.length === 0) {
+                setWeight(["1t", "2.5t", "3.5t", "5t", "17t", "19.5t"]);
+            } else {
+                const weightData = [];
+
+                vehicleWeight.map((value) => {
+                    weightData.push(value.weight);
+                });
+
+                setWeight(weightData);
+            }
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     const onModifyPassword = async () => {
@@ -422,6 +500,185 @@ function UserDetails({ data, onClose }) {
         }
     };
 
+    const openVehicleModal = () => {
+        setShowVehicleModal(true);
+    };
+    const closeVehicleModal = () => {
+        setShowVehicleModal(false);
+    };
+
+    const VehicleModal = () => {
+        return (
+            <Modal
+                open={openVehicleModal}
+                close={closeVehicleModal}
+                header="차량정보 수정"
+            >
+                <form onSubmit={handleSubmit(onModifyVehicle)}>
+                    <HorizontalTable>
+                        <thead></thead>
+                        <tbody>
+                            <tr>
+                                <th>차량번호</th>
+                                <td>
+                                    <input
+                                        placeholder="124가 1114"
+                                        {...register("vehicleNumber")}
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>차량종류</th>
+                                <td>
+                                    <select
+                                        name="type"
+                                        {...register("vehicleType")}
+                                    >
+                                        <option value="1">사다리</option>
+                                        <option value="2">스카이</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>차량옵션</th>
+                                <td>
+                                    {watch("vehicleType") === "2" ? (
+                                        <select
+                                            name="weight"
+                                            {...register("vehicleWeight", "1")}
+                                        >
+                                            {weight.map((value, index) => (
+                                                <option
+                                                    value={Number(index) + 1}
+                                                    key={index}
+                                                >
+                                                    {weight[index]}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    ) : (
+                                        <select
+                                            name="floor"
+                                            {...register("vehicleFloor", "1")}
+                                        >
+                                            {floor.map((value, index) => (
+                                                <option
+                                                    value={Number(index) + 1}
+                                                    key={index}
+                                                >
+                                                    {floor[index]}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </HorizontalTable>
+                    <PointButton type="submit">저장</PointButton>
+                </form>
+            </Modal>
+        );
+    };
+
+    const onModifyVehicle = async (data) => {
+        const { vehicleNumber, vehicleType, vehicleFloor, vehicleWeight } =
+            data;
+
+        if (vehicleNumber.length === 0) return;
+
+        let vehicle = {};
+
+        vehicle.type = Number(vehicleType);
+        vehicle.number = vehicleNumber;
+        if (Number(vehicleType) === 1) {
+            vehicle.floor = Number(vehicleFloor);
+            vehicle.weight = null;
+        } else {
+            vehicle.floor = null;
+            vehicle.weight = Number(vehicleWeight);
+        }
+
+        console.log(vehicle);
+
+        try {
+            const response = await axios.patch(SERVER + "/admin/vehicle", {
+                vehicleId: userData.vehicle[0].id,
+                vehicle,
+            });
+
+            const {
+                data: { result },
+            } = response;
+            console.log(response);
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { vehicle },
+                    },
+                } = response;
+
+                console.log(vehicle);
+                alert("차량정보 수정에 성공하였습니다.");
+                userData.vehicle[0] = vehicle.vehicleResult;
+                closeVehicleModal();
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // const registVehicle = async (data) => {
+    //     console.log(data);
+
+    //     const { vehicleType, vehicleNumber, option } = data;
+
+    //     let vehicle = {};
+
+    //     vehicle.type = vehicleType;
+    //     vehicle.number = vehicleNumber;
+    //     if (vehicleType === 1) {
+    //         vehicle.floor = option;
+    //         vehicle.weight = null;
+    //     } else {
+    //         vehicle.floor = null;
+    //         vehicle.weight = option;
+    //     }
+
+    //     try {
+    //         const response = await axios.post(
+    //             SERVER + "/users/setting/vehicle",
+    //             {
+    //                 vehicle: [vehicle],
+    //             },
+    //             {
+    //                 headers: {
+    //                     auth: await getAsyncStorageToken(),
+    //                 },
+    //             }
+    //         );
+
+    //         const {
+    //             data: { result },
+    //         } = response;
+
+    //         if (result === VALID) {
+    //             const {
+    //                 data: {
+    //                     data: { user },
+    //                 },
+    //             } = response;
+
+    //             setInfo(user);
+    //             navigation.goBack();
+    //         }
+    //     } catch (error) {
+    //         console.log(error);
+    //         navigation.goBack();
+    //         showErrorMessage("차량 정보 등록에 실패하였습니다.");
+    //     }
+    // };
+
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
     return (
@@ -532,7 +789,10 @@ function UserDetails({ data, onClose }) {
                                             ? ""
                                             : userData.vehicle[0].number}
                                         <Blank />
-                                        <PointButton type="button">
+                                        <PointButton
+                                            type="button"
+                                            onClick={openVehicleModal}
+                                        >
                                             수정
                                         </PointButton>
                                     </td>
@@ -638,6 +898,7 @@ function UserDetails({ data, onClose }) {
                     {showVehiclePermissionModal ? (
                         <VehiclePermissionModal />
                     ) : null}
+                    {showVehicleModal ? <VehicleModal /> : null}
                 </Container>
             ) : null}
         </>
