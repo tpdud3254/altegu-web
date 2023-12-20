@@ -51,18 +51,19 @@ function UserDetails({ data, onClose }) {
     const [userData, setUserData] = useState(null);
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
+    const [modifyRecommendData, setModifyRecommendData] = useState(null);
 
-    const [password, setPassword] = useState("");
     const [floor, setFloor] = useState([]);
     const [weight, setWeight] = useState([]);
-    const [selectVehicleType, setSelectVehicleType] = useState(0);
-    const [selectVehicleFloor, setSelectVehicleFloor] = useState(0);
-    const [selectVehicleWeight, setSelectVehicleWeight] = useState(0);
+
+    const [password, setPassword] = useState("");
+    const [recommendUser, setRecommendUser] = useState("");
 
     const [showLicenseModal, setShowLicenseModal] = useState(false);
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
     const [showVehicleModal, setShowVehicleModal] = useState(false);
+    const [showRecommendModal, setShowRecommendModal] = useState(false);
 
     const [processing, setProcessing] = useState(false);
 
@@ -72,10 +73,10 @@ function UserDetails({ data, onClose }) {
     useEffect(() => {
         getVehicleFloor();
         getVehicleWeight();
-        getUsers(data);
+        getUser(data);
     }, []);
 
-    const getUsers = async (data) => {
+    const getUser = async (data) => {
         try {
             const response = await axios.get(SERVER + "/admin/user", {
                 headers: {
@@ -104,11 +105,11 @@ function UserDetails({ data, onClose }) {
                     data: { msg },
                 } = response;
 
-                console.log("getUsers invalid");
+                console.log("getUser invalid");
                 setUserData([]);
             }
         } catch (error) {
-            console.log("getUsers error : ", error);
+            console.log("getUser error : ", error);
         }
     };
 
@@ -628,56 +629,187 @@ function UserDetails({ data, onClose }) {
         }
     };
 
-    // const registVehicle = async (data) => {
-    //     console.log(data);
+    const openRecommendModal = async () => {
+        if (recommendUser.length === 0) return;
 
-    //     const { vehicleType, vehicleNumber, option } = data;
+        if (recommendUser === "1") {
+            const altegoo = { id: 1 };
+            setModifyRecommendData(altegoo);
+            setShowRecommendModal(true);
+            return;
+        }
 
-    //     let vehicle = {};
+        if (recommendUser.length < 11) {
+            //아이디로 조회
+            try {
+                const response = await axios.get(SERVER + "/admin/user", {
+                    headers: {
+                        "ngrok-skip-browser-warning": true,
+                    },
+                    params: { id: recommendUser },
+                });
 
-    //     vehicle.type = vehicleType;
-    //     vehicle.number = vehicleNumber;
-    //     if (vehicleType === 1) {
-    //         vehicle.floor = option;
-    //         vehicle.weight = null;
-    //     } else {
-    //         vehicle.floor = null;
-    //         vehicle.weight = option;
-    //     }
+                const {
+                    data: { result },
+                } = response;
 
-    //     try {
-    //         const response = await axios.post(
-    //             SERVER + "/users/setting/vehicle",
-    //             {
-    //                 vehicle: [vehicle],
-    //             },
-    //             {
-    //                 headers: {
-    //                     auth: await getAsyncStorageToken(),
-    //                 },
-    //             }
-    //         );
+                if (result === VALID) {
+                    const {
+                        data: {
+                            data: { users },
+                        },
+                    } = response;
+                    console.log("getUser valid : ", users);
 
-    //         const {
-    //             data: { result },
-    //         } = response;
+                    if (userData.id === users.id) {
+                        alert("자기 자신은 추천인으로 지정할 수 없습니다.");
+                        return;
+                    }
 
-    //         if (result === VALID) {
-    //             const {
-    //                 data: {
-    //                     data: { user },
-    //                 },
-    //             } = response;
+                    setModifyRecommendData(users);
+                } else {
+                    const {
+                        data: { msg },
+                    } = response;
 
-    //             setInfo(user);
-    //             navigation.goBack();
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //         navigation.goBack();
-    //         showErrorMessage("차량 정보 등록에 실패하였습니다.");
-    //     }
-    // };
+                    console.log("getUser invalid");
+                    alert("유저를 찾지 못했습니다.");
+                    return;
+                }
+            } catch (error) {
+                console.log("getUser error : ", error);
+                alert("유저를 찾지 못했습니다.");
+                return;
+            }
+        } else {
+            //폰으로 조회
+            try {
+                const response = await axios.get(SERVER + "/admin/user/phone", {
+                    headers: {
+                        "ngrok-skip-browser-warning": true,
+                    },
+                    params: { phone: recommendUser },
+                });
+
+                const {
+                    data: { result },
+                } = response;
+
+                if (result === VALID) {
+                    const {
+                        data: {
+                            data: { user },
+                        },
+                    } = response;
+                    console.log("getUser with phone valid : ", user);
+
+                    if (userData.id === user.id) {
+                        alert("자기 자신은 추천인으로 지정할 수 없습니다.");
+                        return;
+                    }
+
+                    setModifyRecommendData(user);
+                } else {
+                    const {
+                        data: { msg },
+                    } = response;
+
+                    console.log("getUser invalid");
+                    alert("유저를 찾지 못했습니다.");
+                    return;
+                }
+            } catch (error) {
+                console.log("getUser error : ", error);
+                alert("유저를 찾지 못했습니다.");
+                return;
+            }
+        }
+
+        setShowRecommendModal(true);
+    };
+    const closeRecommendModal = () => {
+        setShowRecommendModal(false);
+    };
+
+    const RecommendModal = () => {
+        return (
+            <Modal
+                open={openRecommendModal}
+                close={closeRecommendModal}
+                header="추천인 지정"
+            >
+                <div
+                    style={{
+                        fontWeight: "600",
+                        lineHeight: 1.3,
+                        paddingTop: 10,
+                        paddingBottom: 10,
+                        backgroundColor: "lightgray",
+                    }}
+                >
+                    <div>
+                        {GetPhoneNumberWithDash(modifyRecommendData.phone)}
+                    </div>
+                    <div>
+                        {modifyRecommendData.id === 1
+                            ? "알테구"
+                            : modifyRecommendData.id}
+                    </div>
+                    <div>{modifyRecommendData.name}</div>
+                </div>
+                <div style={{ marginTop: 20, marginBottom: -10 }}>
+                    추천인을 지정하시겠습니까?
+                </div>
+                <Buttons>
+                    <PointButton
+                        type="button"
+                        onClick={onModifyRecommendUser}
+                        disabled={processing}
+                    >
+                        {processing ? "저장 중" : "저장"}
+                    </PointButton>
+                </Buttons>
+            </Modal>
+        );
+    };
+
+    const onModifyRecommendUser = async () => {
+        try {
+            const response = await axios.patch(SERVER + "/admin/recommend", {
+                id: userData.id,
+                userId: modifyRecommendData.id,
+            });
+
+            console.log(response.data);
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { recommendUser },
+                    },
+                } = response;
+                console.log(recommendUser);
+                userData.myRecommendUser[0] = recommendUser;
+                setMyRecommendData(getTableData(userData.myRecommendUser));
+                closeRecommendModal();
+                alert("추천인 지정에 성공하였습니다.");
+                setRecommendUser("");
+            } else {
+                const {
+                    data: { msg },
+                } = response;
+
+                alert("추천인 지정에 실패하였습니다.");
+            }
+        } catch (error) {
+            console.log(error);
+            alert("추천인 지정에 실패하였습니다.");
+        }
+    };
 
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
@@ -822,9 +954,19 @@ function UserDetails({ data, onClose }) {
                                     </td>
                                     <th>추천인 지정</th>
                                     <td>
-                                        <input placeholder="전화번호/회원코드 입력" />
+                                        <input
+                                            type="number"
+                                            placeholder="전화번호/회원코드 입력"
+                                            value={recommendUser}
+                                            onChange={(e) =>
+                                                setRecommendUser(e.target.value)
+                                            }
+                                        />
                                         <Blank />
-                                        <PointButton type="button">
+                                        <PointButton
+                                            type="button"
+                                            onClick={openRecommendModal}
+                                        >
                                             저장
                                         </PointButton>
                                     </td>
@@ -899,6 +1041,7 @@ function UserDetails({ data, onClose }) {
                         <VehiclePermissionModal />
                     ) : null}
                     {showVehicleModal ? <VehicleModal /> : null}
+                    {showRecommendModal ? <RecommendModal /> : null}
                 </Container>
             ) : null}
         </>
