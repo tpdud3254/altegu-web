@@ -1,7 +1,13 @@
 import MainLayout from "../../../components/Layout/MainLayout";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import { useEffect, useMemo, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import Table from "../../../components/Table/Table";
 import Modal from "../../../components/Modal";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
@@ -23,6 +29,7 @@ import {
     NumberWithComma,
     GetDate,
     Reset,
+    Reload,
 } from "../../../utils/utils";
 import { useForm } from "react-hook-form";
 import PageTitle from "../../../components/PageTitle";
@@ -82,12 +89,18 @@ function SearchUser() {
     const [showLicenseModal, setShowLicenseModal] = useState(false);
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
 
     const [userData, setUserData] = useState([]);
     const [userIndex, setUserIndex] = useState(null);
     const [tableData, setTableData] = useState(null);
     const [selectedArr, setSelectedArr] = useState([]);
     const [subtractUsers, setSubtractUsers] = useState([]);
+
+    const [processing, setProcessing] = useState(false);
+
+    const licenseRef = useRef();
+    const vehiclePermissionRef = useRef();
 
     useEffect(() => {
         register("originalStartDate");
@@ -239,6 +252,38 @@ function SearchUser() {
         setShowSubtractScreen(false);
     };
 
+    const openDeleteUserModal = async () => {
+        await getSelectedUsers();
+        setShowDeleteUserModal(true);
+    };
+
+    const closeDeleteUserModal = () => {
+        setShowDeleteUserModal(false);
+    };
+
+    const openDeleteUser = async () => {
+        if (selectedArr.length === 0) return;
+
+        openDeleteUserModal();
+    };
+
+    const DeleteUserModal = () => (
+        <Modal
+            open={openDeleteUserModal}
+            close={closeDeleteUserModal}
+            header="유저 삭제"
+        >
+            <div style={{ color: "red", fontWeight: "600", paddingBottom: 10 }}>
+                삭제한 유저는 모든 정보가 영구히 삭제되기 때문에
+                {"\n"}다시 복구 될 수 없습니다.
+            </div>
+            <div style={{ marginBottom: 20 }}>진행하시겠습니까?</div>
+            <DefaultButton type="button" onClick={onDeleteUser}>
+                삭제하기
+            </DefaultButton>
+        </Modal>
+    );
+
     const openPointModal = (index) => {
         setShowPointModal(true);
         setUserIndex(index);
@@ -293,7 +338,6 @@ function SearchUser() {
     };
 
     const LicenseModal = () => {
-        console.log("license : ", userData[userIndex].license);
         return (
             <Modal
                 open={openLicenseModal}
@@ -307,14 +351,20 @@ function SearchUser() {
                     />
                 </div>
                 <Buttons>
-                    <PointButton type="button" onClick={onModifyLicense}>
-                        수정
+                    <input
+                        ref={licenseRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onModifyLicense}
+                        style={{ display: "none" }}
+                    />
+                    <PointButton
+                        type="button"
+                        onClick={onClickModifyLicenseButton}
+                        disabled={processing}
+                    >
+                        {processing ? "수정 중" : "수정"}
                     </PointButton>
-                    <Blank />
-                    <Blank />
-                    <DefaultButton type="button" onClick={closeLicenseModal}>
-                        닫기
-                    </DefaultButton>
                 </Buttons>
             </Modal>
         );
@@ -344,20 +394,20 @@ function SearchUser() {
                     />
                 </div>
                 <Buttons>
+                    <input
+                        ref={vehiclePermissionRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onModifyVehiclePermission}
+                        style={{ display: "none" }}
+                    />
                     <PointButton
                         type="button"
-                        onClick={onModifyVehiclePermission}
+                        onClick={onClickModifyVehiclePermissionButton}
+                        disabled={processing}
                     >
-                        수정
+                        {processing ? "수정 중" : "수정"}
                     </PointButton>
-                    <Blank />
-                    <Blank />
-                    <DefaultButton
-                        type="button"
-                        onClick={closeVehiclePermissionModal}
-                    >
-                        닫기
-                    </DefaultButton>
                 </Buttons>
             </Modal>
         );
@@ -425,11 +475,215 @@ function SearchUser() {
         openSubtractScreen();
     };
 
-    const onDeleteUser = async () => {};
+    const onDeleteUser = async () => {
+        const userList = [];
 
-    const onModifyLicense = async () => {};
+        console.log("selected : ", selectedArr);
 
-    const onModifyVehiclePermission = async () => {};
+        selectedArr.map((data) => {
+            userList.push({
+                userId: userData[data.index].id,
+                pointId: userData[data.index]?.point?.id || null,
+            });
+        });
+        console.log(userList);
+
+        try {
+            const response = await axios.delete(
+                SERVER + "/admin/users/delete",
+                {
+                    data: {
+                        userList,
+                    },
+                }
+            );
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(user);
+
+            if (result === VALID) {
+                console.log("onDeleteUser valid");
+
+                alert("유저 삭제에 성공하였습니다.");
+                Reload();
+                setSelectedArr([]);
+                closeDeleteUserModal();
+            }
+        } catch (error) {}
+    };
+
+    const onClickModifyLicenseButton = useCallback(() => {
+        if (!licenseRef.current) return;
+        licenseRef.current.click();
+    }, []);
+
+    const onModifyLicense = useCallback(async (e) => {
+        if (!e.target.files) return;
+
+        setProcessing(true);
+
+        console.log(e.target.files[0]);
+
+        const formData = new FormData();
+        formData.append("file", e.target.files[0]);
+
+        axios
+            .post(
+                SERVER + "/users/license",
+                {
+                    formData,
+                },
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    transformRequest: [
+                        function () {
+                            return formData;
+                        },
+                    ],
+                }
+            )
+            .then(({ data }) => {
+                const {
+                    data: { location },
+                    result,
+                } = data;
+                if (result === VALID) {
+                    console.log("license url : ", location);
+                    onUploadLicenseUrl(location);
+                }
+            })
+            .catch((error) => {
+                console.log("onModifyLicense error : ", error);
+            })
+            .finally(() => {
+                setProcessing(false);
+            });
+    });
+
+    const onUploadLicenseUrl = async (url) => {
+        try {
+            const response = await axios.post(
+                SERVER + `/admin/upload/license`,
+                {
+                    id: userData[userIndex].id,
+                    url: url,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onUploadLicenseUrl valid");
+                alert("이미지 수정에 성공하였습니다.");
+                Reload();
+            }
+        } catch (error) {
+            alert("이미지 수정에 실패하였습니다.");
+            console.log("onUploadLicenseUrl invalid");
+            console.log(error);
+        } finally {
+            // setUploading(false);
+        }
+    };
+
+    const onClickModifyVehiclePermissionButton = useCallback(() => {
+        if (!vehiclePermissionRef.current) return;
+        vehiclePermissionRef.current.click();
+    }, []);
+
+    const onModifyVehiclePermission = useCallback(async (e) => {
+        if (!e.target.files) return;
+
+        setProcessing(true);
+
+        console.log(e.target.files[0]);
+
+        const formData = new FormData();
+        formData.append("file", e.target.files[0]);
+
+        axios
+            .post(
+                SERVER + "/users/permission",
+                {
+                    formData,
+                },
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    transformRequest: [
+                        function () {
+                            return formData;
+                        },
+                    ],
+                }
+            )
+            .then(({ data }) => {
+                const {
+                    data: { location },
+                    result,
+                } = data;
+                if (result === VALID) {
+                    console.log("permission url : ", location);
+                    onUploadVehiclePermissionUrl(location);
+                }
+            })
+            .catch((error) => {
+                console.log("onModifyVehiclePermission error : ", error);
+            })
+            .finally(() => {
+                setProcessing(false);
+            });
+    });
+
+    const onUploadVehiclePermissionUrl = async (url) => {
+        try {
+            const response = await axios.post(
+                SERVER + `/admin/upload/permission`,
+                {
+                    id: userData[userIndex].id,
+                    url: url,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onUploadVehiclePermissionUrl valid");
+                alert("이미지 수정에 성공하였습니다.");
+                Reload();
+            }
+        } catch (error) {
+            alert("이미지 수정에 실패하였습니다.");
+            console.log("onUploadVehiclePermissionUrl invalid");
+            console.log(error);
+        }
+    };
 
     const onModifyPoint = async () => {
         const pointsData = getValues("pointsData");
@@ -548,7 +802,9 @@ function SearchUser() {
                                             <div>
                                                 {Object.keys(GENDER).map(
                                                     (value, index) => (
-                                                        <>
+                                                        <React.Fragment
+                                                            key={index}
+                                                        >
                                                             <input
                                                                 type="radio"
                                                                 name="gender"
@@ -568,7 +824,7 @@ function SearchUser() {
                                                                       value
                                                                   ] + "성"}
                                                             <Blank />
-                                                        </>
+                                                        </React.Fragment>
                                                     )
                                                 )}
                                             </div>
@@ -622,8 +878,11 @@ function SearchUser() {
                                                 {...register("status")}
                                             >
                                                 {Object.keys(STATUS).map(
-                                                    (value) => (
-                                                        <option value={value}>
+                                                    (value, index) => (
+                                                        <option
+                                                            value={value}
+                                                            key={index}
+                                                        >
                                                             {value === "all"
                                                                 ? "전체"
                                                                 : STATUS[value]}
@@ -641,8 +900,11 @@ function SearchUser() {
                                                 {...register("userType")}
                                             >
                                                 {Object.keys(USER_TYPE).map(
-                                                    (value) => (
-                                                        <option value={value}>
+                                                    (value, index) => (
+                                                        <option
+                                                            value={value}
+                                                            key={index}
+                                                        >
                                                             {value === "all"
                                                                 ? "전체"
                                                                 : USER_TYPE_TEXT[
@@ -662,8 +924,11 @@ function SearchUser() {
                                                 >
                                                     {Object.keys(
                                                         WORK_CATEGORY
-                                                    ).map((value) => (
-                                                        <option value={value}>
+                                                    ).map((value, index) => (
+                                                        <option
+                                                            value={value}
+                                                            key={index}
+                                                        >
                                                             {value === "all"
                                                                 ? "전체"
                                                                 : WORK_CATEGORY_TEXT[
@@ -706,7 +971,7 @@ function SearchUser() {
                                     <Blank />
                                     <button
                                         type="button"
-                                        onClick={onDeleteUser}
+                                        onClick={openDeleteUser}
                                     >
                                         데이터 삭제
                                     </button>
@@ -726,6 +991,7 @@ function SearchUser() {
                         {showVehiclePermissionModal ? (
                             <VehiclePermissionModal />
                         ) : null}
+                        {showDeleteUserModal ? <DeleteUserModal /> : null}
                     </>
                 </form>
             </MainContentLayout>

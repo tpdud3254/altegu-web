@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useState } from "react";
 import styled from "styled-components";
 import {
@@ -19,6 +19,7 @@ import { LinkText } from "../../../components/Text/LinkText";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import axios from "axios";
 import { SERVER, VALID } from "../../../contant";
+import Modal from "../../../components/Modal";
 
 const Container = styled.div`
     width: 100%;
@@ -46,6 +47,15 @@ function UserDetails({ data, onClose }) {
     const [userData, setUserData] = useState(null);
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
+
+    const [showLicenseModal, setShowLicenseModal] = useState(false);
+    const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
+        useState(false);
+
+    const [processing, setProcessing] = useState(false);
+
+    const licenseRef = useRef();
+    const vehiclePermissionRef = useRef();
 
     useEffect(() => {
         getUsers(data);
@@ -133,6 +143,252 @@ function UserDetails({ data, onClose }) {
         return result;
     };
 
+    const openLicenseModal = () => {
+        setShowLicenseModal(true);
+    };
+    const closeLicenseModal = () => {
+        setShowLicenseModal(false);
+    };
+
+    const LicenseModal = () => {
+        return (
+            <Modal
+                open={openLicenseModal}
+                close={closeLicenseModal}
+                header="사업자 등록증"
+            >
+                <div>
+                    <img src={userData.license} style={{ width: "20vw" }} />
+                </div>
+                <Buttons>
+                    <input
+                        ref={licenseRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onModifyLicense}
+                        style={{ display: "none" }}
+                    />
+                    <PointButton
+                        type="button"
+                        onClick={onClickModifyLicenseButton}
+                        disabled={processing}
+                    >
+                        {processing ? "수정 중" : "수정"}
+                    </PointButton>
+                </Buttons>
+            </Modal>
+        );
+    };
+
+    const openVehiclePermissionModal = (index) => {
+        setShowVehiclePermissionModal(true);
+    };
+    const closeVehiclePermissionModal = () => {
+        setShowVehiclePermissionModal(false);
+    };
+
+    const VehiclePermissionModal = () => {
+        console.log("permission : ", userData.vehiclePermission);
+        return (
+            <Modal
+                open={openVehiclePermissionModal}
+                close={closeVehiclePermissionModal}
+                header="화물자동차 운송사업 허가증"
+            >
+                <div>
+                    <img
+                        src={userData.vehiclePermission}
+                        style={{ width: "20vw" }}
+                    />
+                </div>
+                <Buttons>
+                    <input
+                        ref={vehiclePermissionRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={onModifyVehiclePermission}
+                        style={{ display: "none" }}
+                    />
+                    <PointButton
+                        type="button"
+                        onClick={onClickModifyVehiclePermissionButton}
+                        disabled={processing}
+                    >
+                        {processing ? "수정 중" : "수정"}
+                    </PointButton>
+                </Buttons>
+            </Modal>
+        );
+    };
+
+    const onClickModifyLicenseButton = useCallback(() => {
+        if (!licenseRef.current) return;
+        licenseRef.current.click();
+    }, []);
+
+    const onModifyLicense = useCallback(async (e) => {
+        if (!e.target.files) return;
+
+        setProcessing(true);
+
+        console.log(e.target.files[0]);
+
+        const formData = new FormData();
+        formData.append("file", e.target.files[0]);
+
+        axios
+            .post(
+                SERVER + "/users/license",
+                {
+                    formData,
+                },
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    transformRequest: [
+                        function () {
+                            return formData;
+                        },
+                    ],
+                }
+            )
+            .then(({ data }) => {
+                const {
+                    data: { location },
+                    result,
+                } = data;
+                if (result === VALID) {
+                    console.log("license url : ", location);
+                    onUploadLicenseUrl(location);
+                }
+            })
+            .catch((error) => {
+                console.log("onModifyLicense error : ", error);
+            })
+            .finally(() => {
+                setProcessing(false);
+            });
+    });
+
+    const onUploadLicenseUrl = async (url) => {
+        try {
+            const response = await axios.post(
+                SERVER + `/admin/upload/license`,
+                {
+                    id: userData.id,
+                    url: url,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onUploadLicenseUrl valid");
+                closeLicenseModal();
+                userData.license = url;
+                alert("이미지 수정에 성공하였습니다.");
+            }
+        } catch (error) {
+            alert("이미지 수정에 실패하였습니다.");
+            console.log("onUploadLicenseUrl invalid");
+            console.log(error);
+        } finally {
+            // setUploading(false);
+        }
+    };
+
+    const onClickModifyVehiclePermissionButton = useCallback(() => {
+        if (!vehiclePermissionRef.current) return;
+        vehiclePermissionRef.current.click();
+    }, []);
+
+    const onModifyVehiclePermission = useCallback(async (e) => {
+        if (!e.target.files) return;
+
+        setProcessing(true);
+
+        console.log(e.target.files[0]);
+
+        const formData = new FormData();
+        formData.append("file", e.target.files[0]);
+
+        axios
+            .post(
+                SERVER + "/users/permission",
+                {
+                    formData,
+                },
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                    transformRequest: [
+                        function () {
+                            return formData;
+                        },
+                    ],
+                }
+            )
+            .then(({ data }) => {
+                const {
+                    data: { location },
+                    result,
+                } = data;
+                if (result === VALID) {
+                    console.log("permission url : ", location);
+                    onUploadVehiclePermissionUrl(location);
+                }
+            })
+            .catch((error) => {
+                console.log("onModifyVehiclePermission error : ", error);
+            })
+            .finally(() => {
+                setProcessing(false);
+            });
+    });
+
+    const onUploadVehiclePermissionUrl = async (url) => {
+        try {
+            const response = await axios.post(
+                SERVER + `/admin/upload/permission`,
+                {
+                    id: userData.id,
+                    url: url,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onUploadVehiclePermissionUrl valid");
+                closeVehiclePermissionModal();
+                userData.vehiclePermission = url;
+                alert("이미지 수정에 성공하였습니다.");
+            }
+        } catch (error) {
+            alert("이미지 수정에 실패하였습니다.");
+            console.log("onUploadVehiclePermissionUrl invalid");
+            console.log(error);
+        }
+    };
+
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
     return (
@@ -193,14 +449,26 @@ function UserDetails({ data, onClose }) {
                                             {userData.license
                                                 ? "있음  "
                                                 : "없음  "}
-                                            <PointButton>수정</PointButton>
+                                            <PointButton
+                                                type="button"
+                                                onClick={openLicenseModal}
+                                            >
+                                                수정
+                                            </PointButton>
                                         </div>
                                         <div>
                                             화물운송허가증{" "}
                                             {userData.vehiclePermission
                                                 ? "있음  "
                                                 : "없음  "}
-                                            <PointButton>수정</PointButton>
+                                            <PointButton
+                                                type="button"
+                                                onClick={
+                                                    openVehiclePermissionModal
+                                                }
+                                            >
+                                                수정
+                                            </PointButton>
                                         </div>
                                     </td>
                                 </tr>
@@ -309,6 +577,10 @@ function UserDetails({ data, onClose }) {
                             ) : null}
                         </div>
                     </Wrapper>
+                    {showLicenseModal ? <LicenseModal /> : null}
+                    {showVehiclePermissionModal ? (
+                        <VehiclePermissionModal />
+                    ) : null}
                 </Container>
             ) : null}
         </>
