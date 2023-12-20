@@ -44,6 +44,7 @@ import SubtractScreen from "./SubtractScreen";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
 import { PointButton } from "../../../components/Button/PointButton";
 import UserDetails from "./UserDetails";
+import "../../../components/Calendar/calendarStyle.css";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -740,11 +741,6 @@ function SearchUser() {
 
         const startDate = new Date(originalStartDate);
         const endDate = new Date(originalEndDate);
-
-        if (startDate > endDate) {
-            alert("시작 날짜 이후의 날짜를 골라주세요.");
-            return;
-        }
 
         const sendData = {
             name: name ? name : null,

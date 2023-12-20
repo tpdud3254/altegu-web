@@ -8,6 +8,7 @@ import { GlobalStyles } from "./styles/styles";
 import { MENUS, SUB_MENUS } from "./utils/menus";
 import ManageUser from "./pages/User/ManageUser";
 import SearchUser from "./pages/User/SearchUser/SearchUser";
+import ManageMembership from "./pages/User/ManageMembership/ManageMembership";
 
 Amplify.configure(awsExports);
 
@@ -33,7 +34,7 @@ function App() {
                     />
                     <Route
                         path={`${MENUS.USER.route}${SUB_MENUS.USER[1].route}`}
-                        element={<ManageUser />}
+                        element={<ManageMembership />}
                     />
                     <Route
                         path={`${MENUS.ORDER.route}${SUB_MENUS.ORDER[0].route}`}

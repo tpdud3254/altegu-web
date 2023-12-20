@@ -1,5 +1,5 @@
 // export const SERVER = process.env.REACT_APP_SERVER;
-export const SERVER = "https://ed6a-218-238-213-154.ngrok-free.app";
+export const SERVER = "http://localhost:4000";
 export const VALID = "VALID";
 
 export const GENDER = { all: null, male: "남", female: "여" };
@@ -39,4 +39,12 @@ export const WORK_CATEGORY_TEXT = {
     h: "청소/인력",
     m: "이사",
     g: "기타",
+};
+
+export const MEMBERSHIP_STATUS = {
+    all: null,
+    membership: "정회원",
+    normal: "기사회원",
+    block: "이용정지",
+    withdrawal: "탈퇴",
 };
