@@ -1,10 +1,10 @@
 import styled from "styled-components";
 import PropTypes from "prop-types";
 import { useState } from "react";
-import Modal from "./src/components/Modal";
-import { HorizontalTable } from "./src/components/Table/HorizontalTable";
+import Modal from "../../components/Modal";
+import { HorizontalTable } from "../../components/Table/HorizontalTable";
 
-function test() {
+function ManageUser() {
     const [showModal, setShowModal] = useState(false);
 
     const openModal = () => {
@@ -48,5 +48,4 @@ function test() {
     );
 }
 
-test.propTypes = {};
-export default test;
+export default ManageUser;

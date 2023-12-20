@@ -1,5 +1,6 @@
 import styled from "styled-components";
-import { useTable, usePagination } from "react-table";
+import { useTable, usePagination, useRowSelect } from "react-table";
+import React, { useEffect } from "react";
 
 const Styles = styled.div`
     width: 100%;
@@ -37,7 +38,30 @@ const Styles = styled.div`
     }
 `;
 
-function Table({ columns, data }) {
+const IndeterminateCheckbox = React.forwardRef(
+    ({ indeterminate, ...rest }, ref) => {
+        const defaultRef = React.useRef();
+        const resolvedRef = ref || defaultRef;
+
+        React.useEffect(() => {
+            resolvedRef.current.indeterminate = indeterminate;
+        }, [resolvedRef, indeterminate]);
+
+        return (
+            <>
+                <input type="checkbox" ref={resolvedRef} {...rest} />
+            </>
+        );
+    }
+);
+
+function Table({
+    columns,
+    data,
+    selectMode = false,
+    selectedArr,
+    pagenationMode = true,
+}) {
     const {
         getTableProps,
         getTableBodyProps,
@@ -53,14 +77,51 @@ function Table({ columns, data }) {
         previousPage,
         setPageSize,
         state: { pageIndex, pageSize },
+        rows,
+        selectedFlatRows,
+        state: { selectedRowIds },
     } = useTable(
         {
             columns,
             data,
-            initialState: { pageIndex: 0, pageSize: 5 },
+            initialState: { pageIndex: 0, pageSize: 10 },
         },
-        usePagination
+        usePagination,
+        useRowSelect,
+        (hooks) => {
+            if (!selectMode) return;
+            hooks.columns.push((columns) => [
+                // Let's make a column for selection
+                {
+                    id: "selection",
+                    // The header can use the table's getToggleAllRowsSelectedProps method
+                    // to render a checkbox
+                    Header: ({ getToggleAllRowsSelectedProps }) => (
+                        <div>
+                            <IndeterminateCheckbox
+                                {...getToggleAllRowsSelectedProps()}
+                            />
+                        </div>
+                    ),
+                    // The cell can use the individual row's getToggleRowSelectedProps method
+                    // to the render a checkbox
+                    Cell: ({ row }) => (
+                        <div>
+                            <IndeterminateCheckbox
+                                {...row.getToggleRowSelectedProps()}
+                            />
+                        </div>
+                    ),
+                },
+                ...columns,
+            ]);
+        }
     );
+
+    useEffect(() => {
+        if (!selectedArr) return;
+        selectedArr(selectedFlatRows);
+    }, [selectedFlatRows]);
 
     return (
         <Styles>
@@ -97,44 +158,57 @@ function Table({ columns, data }) {
         Pagination can be built however you'd like. 
         This is just a very basic UI implementation:
       */}
-            <div
-                className="pagination"
-                style={{ width: "100%", textAlign: "center" }}
-            >
-                <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
-                    {"<<"}
-                </button>{" "}
-                <button
-                    onClick={() => previousPage()}
-                    disabled={!canPreviousPage}
+            {pagenationMode ? (
+                <div
+                    className="pagination"
+                    style={{ width: "100%", textAlign: "center" }}
                 >
-                    {"<"}
-                </button>{" "}
-                {Array.from(Array(pageOptions.length), (x, index) => (
-                    <span key={index}>
-                        {" "}
-                        <button
-                            onClick={() => gotoPage(index)}
-                            style={{
-                                backgroundColor:
-                                    pageIndex === index ? "grey" : "unset",
-                                color: pageIndex === index ? "white" : "unset",
-                            }}
-                        >
-                            {index + 1}
-                        </button>{" "}
-                    </span>
-                ))}
-                <button onClick={() => nextPage()} disabled={!canNextPage}>
-                    {">"}
-                </button>{" "}
-                <button
-                    onClick={() => gotoPage(pageCount - 1)}
-                    disabled={!canNextPage}
-                >
-                    {">>"}
-                </button>{" "}
-                {/*
+                    <button
+                        type="button"
+                        onClick={() => gotoPage(0)}
+                        disabled={!canPreviousPage}
+                    >
+                        {"<<"}
+                    </button>{" "}
+                    <button
+                        type="button"
+                        onClick={() => previousPage()}
+                        disabled={!canPreviousPage}
+                    >
+                        {"<"}
+                    </button>{" "}
+                    {Array.from(Array(pageOptions.length), (x, index) => (
+                        <span key={index}>
+                            {" "}
+                            <button
+                                type="button"
+                                onClick={() => gotoPage(index)}
+                                style={{
+                                    backgroundColor:
+                                        pageIndex === index ? "grey" : "unset",
+                                    color:
+                                        pageIndex === index ? "white" : "unset",
+                                }}
+                            >
+                                {index + 1}
+                            </button>{" "}
+                        </span>
+                    ))}
+                    <button
+                        type="button"
+                        onClick={() => nextPage()}
+                        disabled={!canNextPage}
+                    >
+                        {">"}
+                    </button>{" "}
+                    <button
+                        type="button"
+                        onClick={() => gotoPage(pageCount - 1)}
+                        disabled={!canNextPage}
+                    >
+                        {">>"}
+                    </button>{" "}
+                    {/*
                 <span>
                     Page{" "}
                     <strong>
@@ -169,7 +243,8 @@ function Table({ columns, data }) {
                         </option>
                     ))}
                 </select> */}
-            </div>
+                </div>
+            ) : null}
         </Styles>
     );
 }

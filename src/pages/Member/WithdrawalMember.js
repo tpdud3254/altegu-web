@@ -32,7 +32,7 @@ const tableCol = [
         Header: "연락처",
     },
     {
-        accessor: "workCategory",
+        accessor: "userType",
         Header: "구분",
     },
     {

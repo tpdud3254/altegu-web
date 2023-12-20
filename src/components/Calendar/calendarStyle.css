@@ -1,5 +1,5 @@
 .react-calendar {
-    width: 800px;
+    width: 300px;
     border: 0px;
     border-radius: 20px;
     padding: 0px 10px 20px 10px;
@@ -34,7 +34,7 @@
 }
 
 .react-calendar button {
-    height: 80px;
+    /* height: 80px; */
 }
 
 .react-calendar__tile {

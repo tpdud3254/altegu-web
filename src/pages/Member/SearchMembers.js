@@ -7,12 +7,15 @@ import MemberDetail from "./MemberDetail";
 import axios from "axios";
 import { SERVER, VALID } from "../../contant";
 import {
-    getAge,
-    getDateTime,
-    getWorkRegion,
-    numberWithComma,
+    GetAge,
+    GetDateTime,
+    GetWorkRegion,
+    NumberWithComma,
 } from "../../utils/utils";
 import { useForm } from "react-hook-form";
+import MainLayout from "../../components/Layout/MainLayout";
+import PageTitle from "../../components/PageTitle";
+import { MENU } from "../../utils/menus";
 
 const tableCol = [
     { accessor: "num", Haeder: "" },
@@ -41,7 +44,7 @@ const tableCol = [
         Header: "연락처",
     },
     {
-        accessor: "workCategory",
+        accessor: "userType",
         Header: "구분",
     },
     {
@@ -109,17 +112,17 @@ function SearchMembers() {
                 num: index + 1,
                 userId: value.userId,
                 name: value.userName,
-                signUpDate: getDateTime(value.createdAt),
-                age: getAge(value.birth),
+                signUpDate: GetDateTime(value.createdAt),
+                age: GetAge(value.birth),
                 gender: value.gender,
                 phone: value.phone,
                 workCategory: value.userType.category,
                 region: value.accessedRegion,
-                workRegion: getWorkRegion(value.workRegion),
+                workRegion: GetWorkRegion(value.workRegion),
                 password: <button>초기화</button>,
                 point: (
                     <button onClick={() => openPointModal(index)}>
-                        {numberWithComma(value.point.curPoint) + "AP"}
+                        {NumberWithComma(value.point.curPoint) + "AP"}
                     </button>
                 ),
                 recommendUser: (
@@ -287,7 +290,7 @@ function SearchMembers() {
                     <tr>
                         <th>현재 포인트</th>
                         <td>
-                            {numberWithComma(
+                            {NumberWithComma(
                                 userData[userIndex].point.curPoint
                             ) + "AP"}
                         </td>
@@ -341,7 +344,9 @@ function SearchMembers() {
     );
 
     return (
-        <>
+        <MainLayout menu={MENU.MEMBER} submenuIndex={0}>
+            <PageTitle title="회원 관리" />
+
             <form onSubmit={handleSubmit(onValid)}>
                 {!showDetail ? (
                     <>
@@ -470,7 +475,7 @@ function SearchMembers() {
                     <MemberDetail close={closeDetail} />
                 )}
             </form>
-        </>
+        </MainLayout>
     );
 }
 
