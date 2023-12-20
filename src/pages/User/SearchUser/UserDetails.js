@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { useState } from "react";
 import styled from "styled-components";
 import {
+    CheckPassword,
     GetAge,
     GetDate,
     GetDateTime,
@@ -48,6 +49,8 @@ function UserDetails({ data, onClose }) {
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
 
+    const [password, setPassword] = useState("");
+
     const [showLicenseModal, setShowLicenseModal] = useState(false);
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
@@ -60,6 +63,8 @@ function UserDetails({ data, onClose }) {
     useEffect(() => {
         getUsers(data);
     }, []);
+
+    console.log(password);
 
     const getUsers = async (data) => {
         try {
@@ -99,6 +104,9 @@ function UserDetails({ data, onClose }) {
     };
 
     const getTableData = (data) => {
+        console.log("getTableData : ", data);
+        if (data.length === 0) return [];
+
         const result = [];
         data.map((value, index) => {
             if (value.id === 1) {
@@ -141,6 +149,31 @@ function UserDetails({ data, onClose }) {
             }
         });
         return result;
+    };
+
+    const onModifyPassword = async () => {
+        if (!CheckPassword(password)) {
+            alert("비밀번호가 조건에 맞지 않습니다.");
+            return;
+        }
+
+        try {
+            const response = await axios.post(SERVER + "/users/password", {
+                phone: userData.phone,
+                password,
+            });
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                alert("비밀번호가 변경 되었습니다.");
+                setPassword("");
+            }
+        } catch (error) {
+            alert("비밀번호가 변경에 실패하였었습니다.");
+        }
     };
 
     const openLicenseModal = () => {
@@ -419,14 +452,34 @@ function UserDetails({ data, onClose }) {
                                             ? GetUserType(userData.userTypeId) +
                                               ">" +
                                               userData.workCategory.name
-                                            : GetUserType(userData.userTypeId)}
+                                            : GetUserType(userData.userTypeId) +
+                                              (userData.membership
+                                                  ? " (정회원)"
+                                                  : "")}
                                     </td>
                                 </tr>
                                 <tr>
                                     <th>회원 ID</th>
                                     <td>{userData.phone}</td>
-                                    <th>비밀번호초기화</th>
-                                    <td></td>
+                                    <th>비밀번호 수정</th>
+                                    <td>
+                                        <input
+                                            type="text"
+                                            placeholder="영문, 숫자를 포함한 8자 이상"
+                                            style={{ width: "15vw" }}
+                                            value={password}
+                                            onChange={(e) =>
+                                                setPassword(e.target.value)
+                                            }
+                                        />
+                                        <Blank />
+                                        <PointButton
+                                            type="button"
+                                            onClick={onModifyPassword}
+                                        >
+                                            수정
+                                        </PointButton>
+                                    </td>
                                 </tr>
 
                                 <tr>
@@ -479,7 +532,9 @@ function UserDetails({ data, onClose }) {
                                             ? ""
                                             : userData.vehicle[0].number}
                                         <Blank />
-                                        <PointButton>수정</PointButton>
+                                        <PointButton type="button">
+                                            수정
+                                        </PointButton>
                                     </td>
                                     <th>차량종류</th>
                                     <td>
@@ -509,7 +564,9 @@ function UserDetails({ data, onClose }) {
                                     <td>
                                         <input placeholder="전화번호/회원코드 입력" />
                                         <Blank />
-                                        <PointButton>저장</PointButton>
+                                        <PointButton type="button">
+                                            저장
+                                        </PointButton>
                                     </td>
                                 </tr>
                                 <tr>
