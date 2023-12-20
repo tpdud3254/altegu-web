@@ -117,8 +117,10 @@ function SubtractScreen({ data, onClose }) {
 
             data.map((user, index) => {
                 const obj = {
-                    id: user.point.id,
+                    userId: user.id,
+                    pointId: user.point.id,
                     point: Number(user.point.curPoint) - 40000,
+                    subtractPoint: 40000,
                 };
                 pointList.push(obj);
             });
@@ -147,8 +149,10 @@ function SubtractScreen({ data, onClose }) {
                 Reload();
             } else {
                 console.log("onModifyPoint invalid");
+                alert("통신비 차감에 실패하였습니다.");
             }
         } catch (error) {
+            alert("통신비 차감에 실패하였습니다.");
             console.log("onModifyPoint error : ", error);
         } finally {
             setProcessing(false);
