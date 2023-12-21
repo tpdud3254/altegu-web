@@ -109,7 +109,7 @@ function SearchOrder() {
         data.map((value, index) => {
             result.push({
                 num: index + 1,
-                orderId: getOrderId(value),
+                orderId: <LinkText> {getOrderId(value)}</LinkText>,
                 registDate: GetDateTime(value.createdAt),
                 workingDateTime: value.dateTime
                     ? GetDateTime(value.dateTime)
@@ -121,7 +121,11 @@ function SearchOrder() {
                 memo: value.memo ? value.memo : "-",
                 acceptUser: value.acceptUserName,
                 orderStatus: getOrderStatus(value),
-                doneDateTime: "",
+                doneDateTime:
+                    value.updatedAt &&
+                    (value.orderStatusId === 5 || value.orderStatusId === 6)
+                        ? GetDateTime(value.updatedAt)
+                        : "-",
             });
         });
         return result;
