@@ -1,5 +1,5 @@
-// export const SERVER = process.env.REACT_APP_SERVER;
-export const SERVER = "http://localhost:4000";
+export const SERVER = process.env.REACT_APP_SERVER;
+// export const SERVER = "http://localhost:4000";
 export const VALID = "VALID";
 
 export const GENDER = { all: null, male: "남", female: "여" };
