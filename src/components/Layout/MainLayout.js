@@ -115,7 +115,7 @@ function MainLayout({ children, path }) {
                 <Container>
                     <Header>
                         <Greeting>안녕하세요. 운영관리자님.</Greeting>
-                        <LogoutButton>로그아웃</LogoutButton>
+                        {/* <LogoutButton>로그아웃</LogoutButton> */}
                     </Header>
                     <Wrapper>
                         <MainNavBar>
