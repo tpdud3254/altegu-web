@@ -17,6 +17,7 @@ import {
     GetDateTime,
     GetPhoneNumberWithDash,
     NumberWithComma,
+    Reload,
     Reset,
 } from "../../../utils/utils";
 import { MEMBERSHIP_TABLE_COL } from "./table";
@@ -29,6 +30,10 @@ import Table from "../../../components/Table/Table";
 import { Calendar as ReactCalendar } from "react-calendar";
 import moment from "moment";
 import "../../../components/Calendar/calendarStyle.css";
+import DetailContentLayout from "../../../components/Layout/DetailContentLayout";
+import SubtractScreen from "./SubtractScreen";
+import Modal from "../../../components/Modal";
+import { DefaultButton } from "../../../components/Button/DefaultButton";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -73,6 +78,7 @@ function ManageMembership() {
         useState(false);
     const [showMembershipEndCalendar, setShowMembershipEndCalendar] =
         useState(false);
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
 
     const [userData, setUserData] = useState([]);
     const [userIndex, setUserIndex] = useState(null);
@@ -202,6 +208,16 @@ function ManageMembership() {
         }
     };
 
+    const getSelectedUsers = async () => {
+        const result = [];
+
+        selectedArr.map((d) => {
+            result.push(userData[d.index]);
+        });
+
+        setSubtractUsers(result);
+    };
+
     const Calendar = ({ value }) => {
         const membership = value.indexOf("membership") != -1 ? true : false;
 
@@ -309,6 +325,97 @@ function ManageMembership() {
         );
     };
 
+    const openSubtractScreen = async () => {
+        await getSelectedUsers();
+        setShowSubtractScreen(true);
+    };
+
+    const closeSubtractScreen = () => {
+        setShowSubtractScreen(false);
+    };
+
+    const onSubtractPoint = async () => {
+        if (selectedArr.length === 0) return;
+
+        openSubtractScreen();
+    };
+
+    const openDeleteUserModal = async () => {
+        await getSelectedUsers();
+        setShowDeleteUserModal(true);
+    };
+
+    const closeDeleteUserModal = () => {
+        setShowDeleteUserModal(false);
+    };
+
+    const openDeleteUser = async () => {
+        if (selectedArr.length === 0) return;
+
+        openDeleteUserModal();
+    };
+
+    const DeleteUserModal = () => (
+        <Modal
+            open={openDeleteUserModal}
+            close={closeDeleteUserModal}
+            header="유저 삭제"
+        >
+            <div style={{ color: "red", fontWeight: "600", paddingBottom: 10 }}>
+                삭제한 유저는 모든 정보가 영구히 삭제되기 때문에
+                {"\n"}다시 복구 될 수 없습니다.
+            </div>
+            <div style={{ marginBottom: 20 }}>진행하시겠습니까?</div>
+            <DefaultButton type="button" onClick={onDeleteUser}>
+                삭제하기
+            </DefaultButton>
+        </Modal>
+    );
+
+    const onDeleteUser = async () => {
+        const userList = [];
+
+        console.log("selected : ", selectedArr);
+
+        selectedArr.map((data) => {
+            userList.push({
+                userId: userData[data.index].id,
+                pointId: userData[data.index]?.point?.id || null,
+            });
+        });
+        console.log(userList);
+
+        try {
+            const response = await axios.delete(
+                SERVER + "/admin/users/delete",
+                {
+                    data: {
+                        userList,
+                    },
+                }
+            );
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(user);
+
+            if (result === VALID) {
+                console.log("onDeleteUser valid");
+
+                alert("유저 삭제에 성공하였습니다.");
+                Reload();
+                setSelectedArr([]);
+                closeDeleteUserModal();
+            }
+        } catch (error) {}
+    };
+
     const onValid = async (data) => {
         console.log(data);
         const {
@@ -355,10 +462,7 @@ function ManageMembership() {
     return (
         <MainLayout path={location.pathname}>
             <PageTitle title="회원 관리" />
-            <MainContentLayout
-                // show={showDetail || showSubtractScreen ? false : true}
-                show={true}
-            >
+            <MainContentLayout show={showSubtractScreen ? false : true}>
                 <form onSubmit={handleSubmit(onValid)}>
                     <>
                         <SearchContainer>
@@ -579,14 +683,14 @@ function ManageMembership() {
                                 <div>
                                     <button
                                         type="button"
-                                        // onClick={onSubtractPoint}
+                                        onClick={onSubtractPoint}
                                     >
                                         회비 차감
                                     </button>
                                     <Blank />
                                     <button
                                         type="button"
-                                        // onClick={openDeleteUser}
+                                        onClick={openDeleteUser}
                                     >
                                         데이터 삭제
                                     </button>
@@ -601,9 +705,18 @@ function ManageMembership() {
                                 />
                             ) : null}
                         </ResultContainer>
+                        {showDeleteUserModal ? <DeleteUserModal /> : null}
                     </>
                 </form>
             </MainContentLayout>
+            {showSubtractScreen && subtractUsers.length > 0 ? (
+                <DetailContentLayout>
+                    <SubtractScreen
+                        onClose={closeSubtractScreen}
+                        data={subtractUsers}
+                    />
+                </DetailContentLayout>
+            ) : null}
         </MainLayout>
     );
 }
