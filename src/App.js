@@ -11,6 +11,7 @@ import SearchUser from "./pages/User/SearchUser/SearchUser";
 import ManageMembership from "./pages/User/ManageMembership/ManageMembership";
 import SearchOrder from "./pages/Order/SearchOrder/SearchOrder";
 import WithdrawalList from "./pages/Point/WithdrawalList/WithdrawalList";
+import BreakdownList from "./pages/Point/WithdrawalList/BreakdownList";
 
 Amplify.configure(awsExports);
 
@@ -45,6 +46,10 @@ function App() {
                     <Route
                         path={`${MENUS.POINT.route}${SUB_MENUS.POINT[0].route}`}
                         element={<WithdrawalList />}
+                    />
+                    <Route
+                        path={`${MENUS.POINT.route}${SUB_MENUS.POINT[1].route}`}
+                        element={<BreakdownList />}
                     />
                 </Routes>
             </HelmetProvider>

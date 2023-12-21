@@ -17,7 +17,7 @@ import {
     GetUserType,
     NumberWithComma,
 } from "../../../utils/utils";
-import { WITHDRAWAL_TABLE_COL } from "./table";
+import { BREAKDOWN_TABLE_COL, WITHDRAWALTABLE_COL } from "./table";
 import Table from "../../../components/Table/Table";
 import { Calendar as ReactCalendar } from "react-calendar";
 import moment from "moment";
@@ -53,7 +53,7 @@ const Buttons = styled.div`
     padding-top: 30px;
 `;
 
-function WithdrawalList() {
+function BreakdownList() {
     const location = useLocation();
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
@@ -86,15 +86,9 @@ function WithdrawalList() {
                         data: { list },
                     },
                 } = response;
-                console.log("getWithdrawalList valid : ", list);
-                const withdrawalList = [];
-                list.map((value) => {
-                    if (value.type === "출금") {
-                        withdrawalList.push(value);
-                    }
-                });
+
                 setPointData(list);
-                setTableData(getTableData(withdrawalList));
+                setTableData(getTableData(list));
             } else {
                 console.log("getWithdrawalList invalid");
                 setPointData([]);
@@ -112,19 +106,15 @@ function WithdrawalList() {
                 userId: value.user.id,
                 name: value.user.name,
                 phone: GetPhoneNumberWithDash(value.user.phone),
-                userType:
-                    value.user.userTypeId === 3
-                        ? GetUserType(value.user.userTypeId) +
-                          ">" +
-                          value.user.workCategory.name
-                        : GetUserType(value.user.userTypeId),
-                dateTime: GetDateTime(value.date),
-                curPoint: NumberWithComma(value.point + value.restPoint) + "AP",
-                withdrawalPoint: (
-                    <div style={{ color: "orangered" }}>
-                        {NumberWithComma(value.point) + "AP"}
-                    </div>
-                ),
+                point: NumberWithComma(value.point) + "AP",
+                type: value.type === "적립" ? "지급" : value.type,
+                saveDate:
+                    value.type === "적립" || value.type === "지급"
+                        ? GetDate(value.date)
+                        : "-",
+                subtractDate: value.type === "차감" ? GetDate(value.date) : "-",
+                withdrawalDate:
+                    value.type === "출금" ? GetDate(value.date) : "-",
                 restPoint: NumberWithComma(value.restPoint) + "AP",
                 bank: value.user.point.bank,
                 accountNumber: value.user.point.accountNumber,
@@ -221,7 +211,7 @@ function WithdrawalList() {
     };
     const onValid = async (data) => {
         console.log(data);
-        const { originalEndDate, originalStartDate, searchData } = data;
+        const { originalEndDate, originalStartDate, searchData, type } = data;
 
         let name = null;
         let userId = null;
@@ -245,12 +235,13 @@ function WithdrawalList() {
             name: name ? name : null,
             userId: userId ? Number(userId) : null,
             phone: phone ? phone : null,
+            type: type && type !== "0" ? type : null,
         };
         console.log(sendData);
         getWithdrawalList(sendData);
     };
 
-    const columns = useMemo(() => WITHDRAWAL_TABLE_COL, []);
+    const columns = useMemo(() => BREAKDOWN_TABLE_COL, []);
     return (
         <MainLayout path={location.pathname}>
             <PageTitle title="포인트 관리" />
@@ -333,6 +324,31 @@ function WithdrawalList() {
                                             </DefaultButton>
                                         </td>
                                     </tr>
+                                    <tr>
+                                        <th>유형</th>
+                                        <td>
+                                            <select
+                                                name="type"
+                                                {...register("type")}
+                                            >
+                                                <option value="0">전체</option>
+                                                <option value="충전">
+                                                    충전
+                                                </option>
+                                                <option value="지급">
+                                                    지급
+                                                </option>
+                                                <option value="차감">
+                                                    차감
+                                                </option>
+                                                <option value="출금">
+                                                    출금
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <th></th>
+                                        <td></td>
+                                    </tr>
                                 </tbody>
                             </HorizontalTable>
                         </SearchContainer>
@@ -349,4 +365,4 @@ function WithdrawalList() {
     );
 }
 
-export default WithdrawalList;
+export default BreakdownList;

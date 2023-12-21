@@ -1,4 +1,4 @@
-export const WITHDRAWALTABLE_COL = [
+export const WITHDRAWAL_TABLE_COL = [
     { accessor: "num", Haeder: "" },
     {
         accessor: "userId",
@@ -27,6 +27,54 @@ export const WITHDRAWALTABLE_COL = [
     {
         accessor: "withdrawalPoint",
         Header: "출금신청포인트",
+    },
+    {
+        accessor: "restPoint",
+        Header: "잔여포인트",
+    },
+    {
+        accessor: "bank",
+        Header: "은행",
+    },
+    {
+        accessor: "accountNumber",
+        Header: "계좌번호",
+    },
+];
+
+export const BREAKDOWN_TABLE_COL = [
+    { accessor: "num", Haeder: "" },
+    {
+        accessor: "userId",
+        Header: "회원코드",
+    },
+    {
+        accessor: "name",
+        Header: "이름",
+    },
+    {
+        accessor: "phone",
+        Header: "연락처",
+    },
+    {
+        accessor: "point",
+        Header: "포인트 금액",
+    },
+    {
+        accessor: "type",
+        Header: "유형",
+    },
+    {
+        accessor: "saveDate",
+        Header: "적립일시",
+    },
+    {
+        accessor: "subtractDate",
+        Header: "차감일시",
+    },
+    {
+        accessor: "withdrawalDate",
+        Header: "출금일시",
     },
     {
         accessor: "restPoint",
