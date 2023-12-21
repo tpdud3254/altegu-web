@@ -1,0 +1,436 @@
+import { useEffect, useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { useLocation } from "react-router-dom";
+import styled from "styled-components";
+import {
+    GetDate,
+    GetDateTime,
+    GetMinusDateTime,
+    NumberWithComma,
+    Reset,
+    numberWithZero,
+} from "../../../utils/utils";
+import { SERVER, VALID } from "../../../contant";
+import axios from "axios";
+import { ORDER_TABLE_COL } from "./table";
+import MainLayout from "../../../components/Layout/MainLayout";
+import PageTitle from "../../../components/PageTitle";
+import MainContentLayout from "../../../components/Layout/MainContentLayout";
+import { HorizontalTable } from "../../../components/Table/HorizontalTable";
+import { Blank } from "../../../components/Blank";
+import Table from "../../../components/Table/Table";
+import { LinkText } from "../../../components/Text/LinkText";
+import "../../../components/Calendar/calendarStyle.css";
+import { Calendar as ReactCalendar } from "react-calendar";
+import moment from "moment";
+
+const SearchContainer = styled.div`
+    width: 100%;
+`;
+
+const SearchText = styled.div`
+    font-weight: 600;
+`;
+
+const ResultContainer = styled.div`
+    width: 100%;
+    margin-top: 30px;
+`;
+
+const ResultWrapper = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    align-items: flex-end;
+`;
+
+const CalendarComponent = styled.div`
+    background-color: white;
+    position: absolute;
+    border: 1px black solid;
+    padding-top: 10px;
+`;
+
+const Buttons = styled.div`
+    padding-top: 30px;
+`;
+
+function SearchOrder() {
+    const location = useLocation();
+    const { register, handleSubmit, setValue, watch, getValues } = useForm();
+
+    const [showDetail, setShowDetail] = useState(false);
+
+    const [showCancelOrder, setShowCancelOrder] = useState(false);
+    const [showStartCalendar, setShowStartCalendar] = useState(false);
+    const [showEndCalendar, setShowEndCalendar] = useState(false);
+
+    const [orderData, setOrderData] = useState([]);
+    const [orderIndex, setOrderIndex] = useState(null);
+    const [tableData, setTableData] = useState(null);
+
+    useEffect(() => {
+        register("originalStartDate");
+        register("originalEndDate");
+        getOrders();
+    }, []);
+
+    const getOrders = async (data) => {
+        try {
+            const response = await axios.get(SERVER + "/admin/orders", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+                ...(data && { params: { ...data } }),
+            });
+            const {
+                data: { result },
+            } = response;
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { orders },
+                    },
+                } = response;
+                console.log("getOrders valid : ", orders);
+                setOrderData(orders);
+                setTableData(getTableData(orders));
+            } else {
+                console.log("getUsers invalid");
+                setOrderData([]);
+            }
+        } catch (error) {
+            console.log("getUsers error : ", error);
+        }
+    };
+
+    const getTableData = (data) => {
+        const result = [];
+        data.map((value, index) => {
+            result.push({
+                num: index + 1,
+                orderId: getOrderId(value),
+                registDate: GetDateTime(value.createdAt),
+                workingDateTime: value.dateTime
+                    ? GetDateTime(value.dateTime)
+                    : "-",
+                address: getAddress(value),
+                registUser: value.registUser.name,
+                price: NumberWithComma(value.price),
+                orderType: getOrderType(value),
+                memo: value.memo ? value.memo : "-",
+                acceptUser: value.acceptUserName,
+                orderStatus: getOrderStatus(value),
+                doneDateTime: "",
+            });
+        });
+        return result;
+    };
+
+    const getOrderId = (value) => {
+        const datetime = GetMinusDateTime(value.dateTime);
+
+        return (
+            datetime.getFullYear().toString().substring(2, 4) +
+            numberWithZero(datetime.getMonth() + 1) +
+            numberWithZero(datetime.getDate()) +
+            value.id
+        );
+    };
+
+    const getAddress = (value) => {
+        return value.direction === "양사" ? (
+            <div style={{ wordBreak: "break-all", maxWidth: "11vw" }}>
+                올림 : {value.address1} <br />
+                내림 : {value.address2}
+            </div>
+        ) : (
+            <div style={{ wordBreak: "break-all", maxWidth: "11vw" }}>
+                {value.address1}
+            </div>
+        );
+    };
+
+    const getOrderType = (value) => {
+        return (
+            <div style={{ wordBreak: "break-all", maxWidth: "11vw" }}>
+                [{value.vehicleType}] {value.direction},{" "}
+                {value.direction === "양사"
+                    ? "올림 : " + value.upFloor + ", 내림 : " + value.downFloor
+                    : value.floor}
+                , {value.volume === "시간" ? value.time : value.quantity}
+            </div>
+        );
+    };
+
+    const getOrderStatus = (value) => {
+        switch (value.orderStatusId) {
+            case 1:
+                return "작업 요청"; //1
+            case 2:
+                return <LinkText>작업 예약</LinkText>; //2
+            case 3:
+                return "작업 예약"; //2
+            case 4:
+                return "작업 중"; //3
+            case 5:
+                return "작업 완료"; //4
+            case 6:
+                return <div style={{ color: "red" }}>작업 완료 확인</div>; //5
+            case 7:
+                return "작업 취소"; //6
+            case 8:
+                return "작업 취소"; //6
+            default:
+                break;
+        }
+    };
+
+    const Calendar = ({ value }) => {
+        const onChange = (data) => {
+            console.log("selected date : ", data);
+            const now = new Date();
+
+            if (value === "startDate") {
+                if (now < data) {
+                    alert("현재 날짜 이전의 날짜를 골라주세요.");
+                    return;
+                }
+                setValue("originalStartDate", data);
+            } else {
+                const startDate = new Date(getValues("originalStartDate"));
+
+                if (!getValues("originalStartDate")) {
+                    alert("시작 날짜를 골라주세요.");
+                    setShowEndCalendar(false);
+                    return;
+                }
+                if (startDate > data) {
+                    alert("시작 날짜 이후의 날짜를 골라주세요.");
+                    return;
+                }
+                setValue("originalEndDate", data);
+            }
+            setValue(value, GetDate(data));
+            setShowEndCalendar(false);
+            setShowStartCalendar(false);
+        };
+
+        return (
+            <CalendarComponent>
+                <ReactCalendar
+                    calendarType="US"
+                    onChange={onChange}
+                    value={getValues(
+                        value === "startDate"
+                            ? "originalStartDate"
+                            : "originalEndDate"
+                    )}
+                    showNeighboringMonth={true}
+                    formatDay={(locale, date) => moment(date).format("DD")}
+                    tileContent={({ date, view }) => {
+                        let html = [];
+
+                        return (
+                            <div key={date} className="contents">
+                                {html}
+                            </div>
+                        );
+                    }}
+                />
+            </CalendarComponent>
+        );
+    };
+
+    const onValid = async (data) => {
+        const {
+            orderId,
+            acceptUser,
+            registUser,
+            orderType,
+            orderStatus,
+            region,
+            originalEndDate,
+            originalStartDate,
+        } = data;
+
+        const sendData = {
+            orderId: orderId ? orderId.substring(6, orderId.length) : null,
+            acceptUser: acceptUser ? acceptUser : null,
+            registUser: registUser ? registUser : null,
+            orderStatus: orderStatus !== "0" ? orderStatus : null,
+            orderType:
+                orderType !== "0"
+                    ? orderType === "1"
+                        ? "사다리차"
+                        : "스카이차"
+                    : null,
+            region: region ? region : null,
+            startDate: originalStartDate ? originalStartDate : null,
+            endDate: originalEndDate ? originalEndDate : null,
+        };
+
+        console.log(sendData);
+        await getOrders(sendData);
+    };
+    const columns = useMemo(() => ORDER_TABLE_COL, []);
+
+    return (
+        <MainLayout path={location.pathname}>
+            <PageTitle title="회원 관리" />
+            <MainContentLayout show={showDetail ? false : true}>
+                <form onSubmit={handleSubmit(onValid)}>
+                    <>
+                        <SearchContainer>
+                            <SearchText>검색 조건 입력</SearchText>
+                            <HorizontalTable>
+                                <thead></thead>
+                                <tbody>
+                                    <tr>
+                                        <th>작업 구분</th>
+                                        <td>
+                                            <select
+                                                name="orderType"
+                                                {...register("orderType")}
+                                            >
+                                                <option value="0">전체</option>
+                                                <option value="1">
+                                                    사다리
+                                                </option>
+                                                <option value="2">
+                                                    스카이
+                                                </option>
+                                            </select>
+                                        </td>
+                                        <th>작업상태</th>
+                                        <td>
+                                            <select
+                                                name="orderStatus"
+                                                {...register("orderStatus")}
+                                            >
+                                                <option value="0">전체</option>
+                                                <option value="1">
+                                                    작업 요청
+                                                </option>
+                                                <option value="2">
+                                                    작업 예약
+                                                </option>
+                                                <option value="3">
+                                                    작업 진행
+                                                </option>
+                                                <option value="4">
+                                                    작업 완료
+                                                </option>
+                                                <option value="5">
+                                                    작업 완료 확인
+                                                </option>
+                                                <option value="6">
+                                                    작업 취소
+                                                </option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>작업자 회원코드</th>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                placeholder="숫자만 입력"
+                                                {...register("acceptUser")}
+                                            />
+                                        </td>
+                                        <th>등록자</th>
+                                        <td>
+                                            <input
+                                                {...register("registUser")}
+                                            />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>기간</th>
+                                        <td>
+                                            <input
+                                                disabled
+                                                {...register("startDate")}
+                                            />
+                                            <Blank />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setShowStartCalendar(true);
+                                                }}
+                                            >
+                                                달력
+                                            </button>
+                                            {showStartCalendar ? (
+                                                <Calendar value="startDate" />
+                                            ) : null}
+                                            <Blank />
+                                            ~
+                                            <Blank />
+                                            <input
+                                                disabled
+                                                {...register("endDate")}
+                                            />
+                                            <Blank />
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    setShowEndCalendar(true);
+                                                }}
+                                            >
+                                                달력
+                                            </button>
+                                            {showEndCalendar ? (
+                                                <Calendar value="endDate" />
+                                            ) : null}
+                                        </td>
+                                        <th>지역명</th>
+                                        <td>
+                                            <input {...register("region")} />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>작업번호</th>
+                                        <td>
+                                            <input
+                                                type="number"
+                                                placeholder="숫자만 입력"
+                                                {...register("orderId")}
+                                            />
+                                        </td>
+                                        <th></th>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </HorizontalTable>
+                            <button type="submit">검색하기</button>
+                            <Blank />
+                            <button type="button" onClick={Reset}>
+                                초기화
+                            </button>
+                        </SearchContainer>
+                        <ResultContainer>
+                            <ResultWrapper>
+                                <div>
+                                    총:{" "}
+                                    {tableData !== null
+                                        ? NumberWithComma(tableData.length)
+                                        : "-"}
+                                    명
+                                </div>
+                            </ResultWrapper>
+                            {tableData !== null ? (
+                                <Table columns={columns} data={tableData} />
+                            ) : null}
+                        </ResultContainer>
+                    </>
+                </form>
+            </MainContentLayout>
+        </MainLayout>
+    );
+}
+
+export default SearchOrder;

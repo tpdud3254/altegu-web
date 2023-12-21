@@ -9,15 +9,15 @@ const getMin = (min) => `${min < 10 ? "0" + min : min}`;
 export const GetDateTime = (dateTime) => {
     const newDateTime = new Date(dateTime);
 
-    const kr_datetime = newDateTime.setHours(newDateTime.getHours() - 9);
+    // const kr_datetime = newDateTime.setHours(newDateTime.getHours() - 9);
 
-    const result = new Date(kr_datetime);
+    // const result = new Date(kr_datetime);
 
-    return `${result.getFullYear().toString().substring(2, 4)}.${getMonth(
-        result.getMonth()
-    )}.${getDate(result.getDate())} ${getHours(result.getHours())}:${getMin(
-        result.getMinutes()
-    )}`;
+    return `${newDateTime.getFullYear().toString().substring(2, 4)}.${getMonth(
+        newDateTime.getMonth()
+    )}.${getDate(newDateTime.getDate())} ${getHours(
+        newDateTime.getHours()
+    )}:${getMin(newDateTime.getMinutes())}`;
 };
 
 export const GetCurrentDateTime = () => {
@@ -30,14 +30,31 @@ export const GetCurrentDateTime = () => {
     return result;
 };
 
+export const GetMinusDateTime = (dateTime) => {
+    const curr = new Date(dateTime);
+
+    const kr_curr = curr.setHours(curr.getHours() - 9);
+
+    const result = new Date(kr_curr);
+
+    return result;
+};
+
 export const GetDate = (dateTime) => {
     const newDateTime = new Date(dateTime);
+
+    // const kr_datetime = newDateTime.setHours(newDateTime.getHours() - 9);
+
+    // const result = new Date(kr_datetime);
 
     return `${newDateTime.getFullYear().toString().substring(2, 4)}.${getMonth(
         newDateTime.getMonth()
     )}.${getDate(newDateTime.getDate())}`;
 };
 
+export const numberWithZero = (num) => {
+    return num < 10 ? "0" + num : num;
+};
 export const GetAge = (birth) => {
     const today = new Date();
     const year = birth.substring(0, 4);
