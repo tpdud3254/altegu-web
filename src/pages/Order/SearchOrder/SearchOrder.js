@@ -7,6 +7,7 @@ import {
     GetDateTime,
     GetMinusDateTime,
     NumberWithComma,
+    Reload,
     Reset,
     numberWithZero,
 } from "../../../utils/utils";
@@ -23,6 +24,8 @@ import { LinkText } from "../../../components/Text/LinkText";
 import "../../../components/Calendar/calendarStyle.css";
 import { Calendar as ReactCalendar } from "react-calendar";
 import moment from "moment";
+import Modal from "../../../components/Modal";
+import { PointButton } from "../../../components/Button/PointButton";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -61,7 +64,7 @@ function SearchOrder() {
 
     const [showDetail, setShowDetail] = useState(false);
 
-    const [showCancelOrder, setShowCancelOrder] = useState(false);
+    const [showCancelOrderModal, setShowCancelOrderModal] = useState(false);
     const [showStartCalendar, setShowStartCalendar] = useState(false);
     const [showEndCalendar, setShowEndCalendar] = useState(false);
 
@@ -120,7 +123,7 @@ function SearchOrder() {
                 orderType: getOrderType(value),
                 memo: value.memo ? value.memo : "-",
                 acceptUser: value.acceptUserName,
-                orderStatus: getOrderStatus(value),
+                orderStatus: getOrderStatus(value, index),
                 doneDateTime:
                     value.updatedAt &&
                     (value.orderStatusId === 5 || value.orderStatusId === 6)
@@ -167,12 +170,16 @@ function SearchOrder() {
         );
     };
 
-    const getOrderStatus = (value) => {
+    const getOrderStatus = (value, index) => {
         switch (value.orderStatusId) {
             case 1:
                 return "작업 요청"; //1
             case 2:
-                return <LinkText>작업 예약</LinkText>; //2
+                return (
+                    <LinkText onClick={() => openCancelOrderModal(index)}>
+                        작업 예약
+                    </LinkText>
+                ); //2
             case 3:
                 return "작업 예약"; //2
             case 4:
@@ -244,6 +251,90 @@ function SearchOrder() {
                 />
             </CalendarComponent>
         );
+    };
+
+    const openCancelOrderModal = async (index) => {
+        setOrderIndex(index);
+        setShowCancelOrderModal(true);
+    };
+
+    const closeCancelOrderModal = () => {
+        setOrderIndex(null);
+        setShowCancelOrderModal(false);
+    };
+
+    const CancelOrderModal = () => (
+        <Modal
+            open={openCancelOrderModal}
+            close={closeCancelOrderModal}
+            header="작업 예약 취소"
+        >
+            <div
+                style={{
+                    fontWeight: "600",
+                    lineHeight: 1.3,
+                    paddingTop: 10,
+                    paddingBottom: 10,
+                    backgroundColor: "lightgray",
+                }}
+            >
+                <div>{GetDateTime(orderData[orderIndex].dateTime)}</div>
+                <div>{orderData[orderIndex].simpleAddress1}</div>
+                <div>
+                    [{orderData[orderIndex].vehicleType}]{" "}
+                    {orderData[orderIndex].direction},{" "}
+                    {orderData[orderIndex].direction === "양사"
+                        ? "올림 : " +
+                          orderData[orderIndex].upFloor +
+                          ", 내림 : " +
+                          orderData[orderIndex].downFloor
+                        : orderData[orderIndex].floor}
+                    ,{" "}
+                    {orderData[orderIndex].volume === "시간"
+                        ? orderData[orderIndex].time
+                        : orderData[orderIndex].quantity}
+                </div>
+            </div>
+            <div style={{ marginTop: 20, marginBottom: -10 }}>
+                취소하시겠습니까?
+            </div>
+            <Buttons>
+                <PointButton type="button" onClick={onCancelOrder}>
+                    확인
+                </PointButton>
+            </Buttons>
+        </Modal>
+    );
+
+    const onCancelOrder = async () => {
+        console.log(orderIndex);
+
+        try {
+            const response = await axios.patch(SERVER + "/admin/order/cancel", {
+                orderId: orderData[orderIndex].id,
+            });
+
+            const {
+                data: {
+                    data: { order },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(order);
+
+            if (result === VALID) {
+                alert("예약취소 성공하였습니다.");
+                Reload();
+            } else {
+                console.log("onModifyPoint invalid");
+                alert("예약취소 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("예약취소 실패하였습니다.");
+            console.log("onModifyPoint error : ", error);
+        }
     };
 
     const onValid = async (data) => {
@@ -430,6 +521,7 @@ function SearchOrder() {
                                 <Table columns={columns} data={tableData} />
                             ) : null}
                         </ResultContainer>
+                        {showCancelOrderModal ? <CancelOrderModal /> : null}
                     </>
                 </form>
             </MainContentLayout>
