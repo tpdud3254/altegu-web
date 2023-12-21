@@ -372,7 +372,7 @@ function SearchOrder() {
 
     return (
         <MainLayout path={location.pathname}>
-            <PageTitle title="회원 관리" />
+            <PageTitle title="작업 관리" />
             <MainContentLayout show={showDetail ? false : true}>
                 <form onSubmit={handleSubmit(onValid)}>
                     <>
