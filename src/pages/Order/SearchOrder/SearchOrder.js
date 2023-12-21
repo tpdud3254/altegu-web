@@ -26,6 +26,8 @@ import { Calendar as ReactCalendar } from "react-calendar";
 import moment from "moment";
 import Modal from "../../../components/Modal";
 import { PointButton } from "../../../components/Button/PointButton";
+import DetailContentLayout from "../../../components/Layout/DetailContentLayout";
+import OrderDetail from "./OrderDetail";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -112,7 +114,11 @@ function SearchOrder() {
         data.map((value, index) => {
             result.push({
                 num: index + 1,
-                orderId: <LinkText> {getOrderId(value)}</LinkText>,
+                orderId: (
+                    <LinkText onClick={() => openDetail(index)}>
+                        {getOrderId(value)}
+                    </LinkText>
+                ),
                 registDate: GetDateTime(value.createdAt),
                 workingDateTime: value.dateTime
                     ? GetDateTime(value.dateTime)
@@ -251,6 +257,16 @@ function SearchOrder() {
                 />
             </CalendarComponent>
         );
+    };
+
+    const openDetail = (index) => {
+        setShowDetail(true);
+        setOrderIndex(index);
+    };
+
+    const closeDetail = () => {
+        setShowDetail(false);
+        setOrderIndex(null);
     };
 
     const openCancelOrderModal = async (index) => {
@@ -525,6 +541,14 @@ function SearchOrder() {
                     </>
                 </form>
             </MainContentLayout>
+            {showDetail && orderIndex !== null ? (
+                <DetailContentLayout>
+                    <OrderDetail
+                        onClose={closeDetail}
+                        data={orderData[orderIndex]}
+                    />
+                </DetailContentLayout>
+            ) : null}
         </MainLayout>
     );
 }

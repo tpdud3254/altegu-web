@@ -991,7 +991,7 @@ function SearchUser() {
                     </>
                 </form>
             </MainContentLayout>
-            {showDetail && userIndex ? (
+            {showDetail && userIndex !== null ? (
                 <DetailContentLayout>
                     <UserDetails
                         onClose={closeDetail}
