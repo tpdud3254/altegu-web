@@ -106,6 +106,7 @@ function BreakdownList() {
                 userId: value.user.id,
                 name: value.user.name,
                 phone: GetPhoneNumberWithDash(value.user.phone),
+                content: value.content,
                 point: NumberWithComma(value.point) + "AP",
                 type: value.type === "적립" ? "지급" : value.type,
                 saveDate:
@@ -254,7 +255,7 @@ function BreakdownList() {
                                 <thead></thead>
                                 <tbody>
                                     <tr>
-                                        <th>포인트 지급 총액</th>
+                                        <th>포인트 적립 총액</th>
                                         <td>{getTotalSavePoint()}</td>
                                         <th>포인트 출금 총액</th>
                                         <td>{getTotalWithdrawalPoint()}</td>

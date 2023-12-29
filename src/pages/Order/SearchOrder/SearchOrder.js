@@ -191,9 +191,10 @@ function SearchOrder() {
             case 4:
                 return "작업 중"; //3
             case 5:
-                return "작업 완료"; //4
+                return <div style={{ color: "red" }}>작업 완료</div>; //4
+
             case 6:
-                return <div style={{ color: "red" }}>작업 완료 확인</div>; //5
+                return "작업 완료 확인"; //5
             case 7:
                 return "작업 취소"; //6
             case 8:

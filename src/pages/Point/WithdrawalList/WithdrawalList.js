@@ -126,6 +126,7 @@ function WithdrawalList() {
                     </div>
                 ),
                 restPoint: NumberWithComma(value.restPoint) + "AP",
+                accountName: value.user.point.accountName,
                 bank: value.user.point.bank,
                 accountNumber: value.user.point.accountNumber,
             });
@@ -263,7 +264,7 @@ function WithdrawalList() {
                                 <thead></thead>
                                 <tbody>
                                     <tr>
-                                        <th>포인트 지급 총액</th>
+                                        <th>포인트 적립 총액</th>
                                         <td>{getTotalSavePoint()}</td>
                                         <th>포인트 출금 총액</th>
                                         <td>{getTotalWithdrawalPoint()}</td>

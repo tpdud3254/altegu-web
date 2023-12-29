@@ -33,6 +33,10 @@ export const WITHDRAWAL_TABLE_COL = [
         Header: "잔여포인트",
     },
     {
+        accessor: "accountName",
+        Header: "예금주",
+    },
+    {
         accessor: "bank",
         Header: "은행",
     },
@@ -63,6 +67,10 @@ export const BREAKDOWN_TABLE_COL = [
     {
         accessor: "type",
         Header: "유형",
+    },
+    {
+        accessor: "content",
+        Header: "내용",
     },
     {
         accessor: "saveDate",

@@ -161,6 +161,8 @@ function SearchUser() {
                         ? GetUserType(value.userTypeId) +
                           ">" +
                           value.workCategory.name
+                        : value.membership
+                        ? GetUserType(value.userTypeId) + " (정회원)"
                         : GetUserType(value.userTypeId),
                 region: value.accessedRegion,
                 license:
