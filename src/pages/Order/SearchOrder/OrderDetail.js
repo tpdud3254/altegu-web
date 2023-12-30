@@ -7,6 +7,7 @@ import {
     GetMinusDateTime,
     GetPhoneNumberWithDash,
     NumberWithComma,
+    Reload,
     Reset,
 } from "../../../utils/utils";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
@@ -504,6 +505,28 @@ function OrderDetail({ onClose, data }) {
             } else alert(msg);
         } catch (error) {
             console.log(error);
+        }
+    };
+
+    const onDeleteOrder = async () => {
+        try {
+            const response = await axios.delete(SERVER + "/admin/order", {
+                data: {
+                    orderId: order.id,
+                },
+            });
+
+            console.log(response);
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                Reload();
+            } else alert("오더 삭제에 실패했습니다.");
+        } catch (error) {
+            console.log(error);
+            alert("오더 삭제에 실패했습니다.");
         }
     };
 
@@ -1249,7 +1272,12 @@ function OrderDetail({ onClose, data }) {
                             </Buttons>
                         ) : (
                             <Buttons>
-                                <PointButton>삭제하기</PointButton>
+                                <PointButton
+                                    type="button"
+                                    onClick={onDeleteOrder}
+                                >
+                                    삭제하기
+                                </PointButton>
 
                                 {order.orderStatusId === 1 ||
                                 order.orderStatusId === 2 ? (
