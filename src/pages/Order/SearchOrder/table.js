@@ -45,3 +45,50 @@ export const ORDER_TABLE_COL = [
         Header: "완료일시",
     },
 ];
+
+export const RECOMMEND_TABLE_COL = [
+    {
+        accessor: "userId",
+        Header: "회원코드",
+    },
+    {
+        accessor: "name",
+        Header: "이름",
+    },
+    {
+        accessor: "signUpDate",
+        Header: "가입일",
+    },
+    {
+        accessor: "age",
+        Header: "나이",
+    },
+    {
+        accessor: "gender",
+        Header: "성별",
+    },
+    {
+        accessor: "phone",
+        Header: "연락처",
+    },
+    {
+        accessor: "userType",
+        Header: "구분",
+    },
+    {
+        accessor: "region",
+        Header: "접속 지역",
+    },
+    {
+        accessor: "curPoint",
+        Header: "보유 포인트",
+    },
+    {
+        accessor: "status",
+        Header: "상태",
+    },
+    {
+        accessor: "withdrawalDate",
+        Header: "탈퇴일",
+    },
+];

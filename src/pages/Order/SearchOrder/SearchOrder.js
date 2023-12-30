@@ -10,7 +10,6 @@ import {
     NumberWithComma,
     Reload,
     Reset,
-    numberWithZero,
 } from "../../../utils/utils";
 import { SERVER, VALID } from "../../../contant";
 import axios from "axios";
@@ -29,6 +28,7 @@ import Modal from "../../../components/Modal";
 import { PointButton } from "../../../components/Button/PointButton";
 import DetailContentLayout from "../../../components/Layout/DetailContentLayout";
 import OrderDetail from "./OrderDetail";
+import UserDetails from "./UserDetails";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -66,14 +66,16 @@ function SearchOrder() {
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
     const [showDetail, setShowDetail] = useState(false);
+    const [showUserDetail, setShowUserDetail] = useState(false);
 
     const [showCancelOrderModal, setShowCancelOrderModal] = useState(false);
     const [showStartCalendar, setShowStartCalendar] = useState(false);
     const [showEndCalendar, setShowEndCalendar] = useState(false);
 
     const [orderData, setOrderData] = useState([]);
-    const [orderIndex, setOrderIndex] = useState(null);
     const [tableData, setTableData] = useState(null);
+    const [orderIndex, setOrderIndex] = useState(null);
+    const [userIndex, setUserIndex] = useState(null);
 
     useEffect(() => {
         register("originalStartDate");
@@ -125,11 +127,11 @@ function SearchOrder() {
                     ? GetMinusDateTime(value.dateTime)
                     : "-",
                 address: getAddress(value),
-                registUser: value.registUser.name,
+                registUser: getName(value.registUser.id, value.registUser.name),
                 price: NumberWithComma(value.price),
                 orderType: getOrderType(value),
                 memo: value.memo ? value.memo : "-",
-                acceptUser: value.acceptUserName,
+                acceptUser: getName(value.acceptUser, value.acceptUserName),
                 orderStatus: getOrderStatus(value, index),
                 doneDateTime:
                     value.updatedAt &&
@@ -140,6 +142,10 @@ function SearchOrder() {
         });
         return result;
     };
+
+    const getName = (index, name) => (
+        <LinkText onClick={() => openUserDetail(index)}>{name}</LinkText>
+    );
 
     const getOrderId = (value) => {
         const datetime = GetMinusDate(value.dateTime);
@@ -270,7 +276,10 @@ function SearchOrder() {
                 ? GetMinusDateTime(data.dateTime)
                 : "-";
             prev1[orderIndex].address = getAddress(data);
-            prev1[orderIndex].registUser = data.registUser.name;
+            prev1[orderIndex].registUser = getName(
+                data.registUser.id,
+                data.registUser.name
+            );
             prev1[orderIndex].price = NumberWithComma(data.price);
             prev1[orderIndex].orderType = getOrderType(data);
             prev1[orderIndex].memo = data.memo ? data.memo : "-";
@@ -292,6 +301,17 @@ function SearchOrder() {
         }
         setShowDetail(false);
         setOrderIndex(null);
+    };
+
+    const openUserDetail = (index) => {
+        console.log("user id : ", index);
+        setShowUserDetail(true);
+        setUserIndex(index);
+    };
+
+    const closeUserDetail = () => {
+        setShowUserDetail(false);
+        setUserIndex(null);
     };
 
     const openCancelOrderModal = async (index) => {
@@ -414,7 +434,9 @@ function SearchOrder() {
     return (
         <MainLayout path={location.pathname}>
             <PageTitle title="작업 관리" />
-            <MainContentLayout show={showDetail ? false : true}>
+            <MainContentLayout
+                show={showDetail || showUserDetail ? false : true}
+            >
                 <form onSubmit={handleSubmit(onValid)}>
                     <>
                         <SearchContainer>
@@ -572,6 +594,11 @@ function SearchOrder() {
                         onClose={closeDetail}
                         data={orderData[orderIndex]}
                     />
+                </DetailContentLayout>
+            ) : null}
+            {showUserDetail && userIndex !== null ? (
+                <DetailContentLayout>
+                    <UserDetails onClose={closeUserDetail} data={userIndex} />
                 </DetailContentLayout>
             ) : null}
         </MainLayout>
