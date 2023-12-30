@@ -5,6 +5,7 @@ import styled from "styled-components";
 import {
     GetDate,
     GetDateTime,
+    GetMinusDate,
     GetMinusDateTime,
     NumberWithComma,
     Reload,
@@ -121,7 +122,7 @@ function SearchOrder() {
                 ),
                 registDate: GetDateTime(value.createdAt),
                 workingDateTime: value.dateTime
-                    ? GetDateTime(value.dateTime)
+                    ? GetMinusDateTime(value.dateTime)
                     : "-",
                 address: getAddress(value),
                 registUser: value.registUser.name,
@@ -141,14 +142,9 @@ function SearchOrder() {
     };
 
     const getOrderId = (value) => {
-        const datetime = GetMinusDateTime(value.dateTime);
+        const datetime = GetMinusDate(value.dateTime);
 
-        return (
-            datetime.getFullYear().toString().substring(2, 4) +
-            numberWithZero(datetime.getMonth() + 1) +
-            numberWithZero(datetime.getDate()) +
-            value.id
-        );
+        return datetime + value.id;
     };
 
     const getAddress = (value) => {
@@ -265,7 +261,35 @@ function SearchOrder() {
         setOrderIndex(index);
     };
 
-    const closeDetail = () => {
+    const closeDetail = (data) => {
+        if (data) {
+            const prev1 = [...tableData];
+
+            prev1[orderIndex].registDate = GetDateTime(data.createdAt);
+            prev1[orderIndex].workingDateTime = data.dateTime
+                ? GetMinusDateTime(data.dateTime)
+                : "-";
+            prev1[orderIndex].address = getAddress(data);
+            prev1[orderIndex].registUser = data.registUser.name;
+            prev1[orderIndex].price = NumberWithComma(data.price);
+            prev1[orderIndex].orderType = getOrderType(data);
+            prev1[orderIndex].memo = data.memo ? data.memo : "-";
+            prev1[orderIndex].orderStatus = getOrderStatus(
+                data,
+                Number(prev1[orderIndex].num) - 1
+            );
+            prev1[orderIndex].doneDateTime =
+                data.updatedAt &&
+                (data.orderStatusId === 5 || data.orderStatusId === 6)
+                    ? GetDateTime(data.updatedAt)
+                    : "-";
+
+            setTableData([...prev1]);
+
+            const prev2 = [...orderData];
+            prev2[orderIndex] = { ...data };
+            setOrderData([...prev2]);
+        }
         setShowDetail(false);
         setOrderIndex(null);
     };

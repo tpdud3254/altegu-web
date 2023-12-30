@@ -49,10 +49,11 @@ export const MEMBERSHIP_STATUS = {
     withdrawal: "탈퇴",
 };
 
-export const ORDER_TYPE = ["작업종류", "사다리", "스카이"];
+export const ORDER_TYPE = ["작업종류", "사다리차", "스카이차"];
 export const ORDER_DIRECTION = ["방향", "내림", "올림", "양사"];
 export const ORDER_VOLUME = ["작업량", "시간", "물량"];
 export const ORDER_VOLUME_TIME = [
+    "시간 선택",
     "간단\n(가구/씽크대/가전)",
     "1시간",
     "2시간",
@@ -61,6 +62,7 @@ export const ORDER_VOLUME_TIME = [
     "하루",
 ];
 export const ORDER_VOLUME_QUANTITY = [
+    "물량 선택",
     "1톤\n(이삿짐 / 1톤 해당하는 짐)",
     "2.5 - 5톤",
     "6톤",

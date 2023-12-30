@@ -37,7 +37,25 @@ export const GetMinusDateTime = (dateTime) => {
 
     const result = new Date(kr_curr);
 
-    return result;
+    return `${result.getFullYear().toString().substring(2, 4)}.${getMonth(
+        result.getMonth()
+    )}.${getDate(result.getDate())} ${getHours(result.getHours())}:${getMin(
+        result.getMinutes()
+    )}`;
+};
+
+export const GetMinusDate = (dateTime) => {
+    const curr = new Date(dateTime);
+
+    const kr_curr = curr.setHours(curr.getHours() - 9);
+
+    const result = new Date(kr_curr);
+
+    return (
+        result.getFullYear().toString().substring(2, 4) +
+        numberWithZero(result.getMonth() + 1) +
+        numberWithZero(result.getDate())
+    );
 };
 
 export const GetDate = (dateTime) => {

@@ -3,11 +3,11 @@ import { LinkText } from "../../../components/Text/LinkText";
 import {
     GetDate,
     GetDateTime,
+    GetMinusDate,
     GetMinusDateTime,
     GetPhoneNumberWithDash,
     NumberWithComma,
     Reset,
-    numberWithZero,
 } from "../../../utils/utils";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import { PointButton } from "../../../components/Button/PointButton";
@@ -21,9 +21,14 @@ import {
     ORDER_DIRECTION,
     ORDER_TYPE,
     ORDER_VOLUME,
+    ORDER_VOLUME_QUANTITY,
+    ORDER_VOLUME_TIME,
+    SERVER,
     SKY_OPTION,
     SKY_TIME,
+    VALID,
 } from "../../../contant";
+import axios from "axios";
 
 const Container = styled.div`
     width: 100%;
@@ -57,28 +62,32 @@ const Buttons = styled.div`
     justify-content: center;
 `;
 
-function OrderDetail({ onClose, data: order }) {
-    const { register, handleSubmit, setValue, watch, getValues } = useForm();
+function OrderDetail({ onClose, data }) {
+    const { register, handleSubmit, setValue, watch, getValues, reset } =
+        useForm();
 
     const [modifyMode, setModifyMode] = useState(false);
 
     const [showWorkDateCalendar, setShowWorkDateCalendar] = useState(false);
     const [showRegistDateCalendar, setShowRegistDateCalendar] = useState(false);
 
+    const [order, setOrder] = useState(null);
+    const [updatedOrder, setUpdatedOrder] = useState(null);
+
     useEffect(() => {
+        setOrder(data);
         register("originalWorkDate");
         register("originalRegistDate");
     }, []);
 
-    const getOrderId = (value) => {
-        const datetime = GetMinusDateTime(value.dateTime);
+    useEffect(() => {
+        reset();
+    }, [modifyMode]);
 
-        return (
-            datetime.getFullYear().toString().substring(2, 4) +
-            numberWithZero(datetime.getMonth() + 1) +
-            numberWithZero(datetime.getDate()) +
-            value.id
-        );
+    const getOrderId = (value) => {
+        const datetime = GetMinusDate(value.dateTime);
+
+        return datetime + value.id;
     };
 
     const getOrderType = (value) => {
@@ -148,49 +157,359 @@ function OrderDetail({ onClose, data: order }) {
         );
     };
 
-    const RegistDateCalendar = () => {
-        const onChange = (data) => {
-            console.log("selected date : ", data);
-            // const now = new Date();
+    const onValid = async (data) => {
+        console.log(data);
+        setUpdatedOrder(null);
+        const {
+            address1,
+            address2,
+            detailAddress1,
+            detailAddress2,
+            direction,
+            downFloor,
+            floor,
+            memo,
+            orderStatus,
+            orderType,
+            originalRegistDate,
+            originalWorkDate,
+            price,
+            registDate,
+            registUser,
+            reigstTime,
+            skyTime,
+            upFloor,
+            volume,
+            workDate,
+            workTime,
+            time,
+            quantity,
+            directPhone,
+        } = data;
 
-            // if (now > data) {
-            //     alert("현재 날짜 이후의 날짜를 골라주세요.");
-            //     return;
-            // }
+        const registUserResult = Number(registUser) || null;
 
-            setValue("originalRegistDate", data);
-            setValue("registDate", GetDate(data));
-            setShowRegistDateCalendar(false);
+        if (registUserResult) {
+            const response = await getUser(registUserResult);
+            if (!response) {
+                alert("찾을 수 없는 사용자입니다.");
+                return;
+            }
+        }
+        let workDateTimeResult = true;
+        const workDateTime = workDate ? new Date(originalWorkDate) : null;
+        const workTimeArr = workTime.split(":");
+        if (workDateTime && workTimeArr.length > 1) {
+            workDateTime.setHours(Number(workTimeArr[0]));
+            workDateTime.setMinutes(Number(workTimeArr[1]));
+        } else {
+            workDateTimeResult = false;
+        }
+
+        let registDateTimeResult = true;
+        const registDateTime = registDate ? new Date(originalRegistDate) : null;
+        const registTimeArr = reigstTime ? reigstTime.split(":") : [];
+        if (registDateTime && registTimeArr.length > 1) {
+            registDateTime.setHours(Number(registTimeArr[0]));
+            registDateTime.setMinutes(Number(registTimeArr[1]));
+        } else {
+            registDateTimeResult = false;
+        }
+
+        let address1Result = true;
+        if (
+            !address1 ||
+            address1.length < 1 ||
+            !detailAddress1 ||
+            detailAddress1.length < 1
+        )
+            address1Result = false;
+
+        let latitude1 = null;
+        let longitude1 = null;
+        let simpleAddress1 = null;
+        if (address1Result && address1 && address1.length > 0) {
+            try {
+                const res = await axios.get(
+                    `https://dapi.kakao.com/v2/local/search/address.json?query=${address1}`,
+                    {
+                        headers: {
+                            Authorization:
+                                "KakaoAK 86e0df46fbae745bb4c658276b280088",
+                        },
+                    }
+                );
+
+                const {
+                    data: { documents },
+                } = res;
+
+                console.log("kakao map response : ", documents);
+
+                latitude1 =
+                    documents && documents.length > 0 ? documents[0].y : null;
+                longitude1 =
+                    documents && documents.length > 0 ? documents[0].x : null;
+
+                simpleAddress1 =
+                    documents && documents.length > 0
+                        ? documents[0].address.region_1depth_name +
+                          " " +
+                          documents[0].address.region_2depth_name
+                        : null;
+            } catch (error) {
+                alert("1차 작업 주소를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (!(latitude1 && longitude1)) {
+                alert("1차 작업 주소를 찾을 수 없습니다.");
+                return;
+            }
+        }
+
+        let address2Result = true;
+        if (
+            !address2 ||
+            address2.length < 1 ||
+            !detailAddress2 ||
+            detailAddress2.length < 1
+        )
+            address2Result = false;
+
+        let latitude2 = null;
+        let longitude2 = null;
+        let simpleAddress2 = null;
+        if (address2Result && address2 && address2.length > 0) {
+            try {
+                const res = await axios.get(
+                    `https://dapi.kakao.com/v2/local/search/address.json?query=${address2}`,
+                    {
+                        headers: {
+                            Authorization:
+                                "KakaoAK 86e0df46fbae745bb4c658276b280088",
+                        },
+                    }
+                );
+
+                const {
+                    data: { documents },
+                } = res;
+
+                console.log("kakao map response : ", documents);
+
+                latitude2 =
+                    documents && documents.length > 0 ? documents[0].y : null;
+                longitude2 =
+                    documents && documents.length > 0 ? documents[0].x : null;
+                simpleAddress2 =
+                    documents && documents.length > 0
+                        ? documents[0].address.region_1depth_name +
+                          " " +
+                          documents[0].address.region_2depth_name
+                        : null;
+            } catch (error) {
+                alert("2차 작업 주소를 찾을 수 없습니다.");
+                return;
+            }
+
+            if (!(latitude2 && longitude2)) {
+                alert("2차 작업 주소를 찾을 수 없습니다.");
+                return;
+            }
+        }
+
+        let orderTypeResult = null;
+        if (orderType !== "0") orderTypeResult = ORDER_TYPE[Number(orderType)];
+
+        let directionResult = null;
+        let volumeResult = null;
+        let timeResult = null;
+        let skyTimeResult = null;
+        let quantityResult = null;
+        let floorResult = null;
+        let skyFloorResult = null;
+        let downFloorResult = null;
+        let upFloorResult = null;
+
+        if (orderType === "1") {
+            //사다리차
+            if (direction !== "0") {
+                directionResult = ORDER_DIRECTION[Number(direction)];
+                if (volume !== "0") {
+                    volumeResult = ORDER_VOLUME[Number(volume)];
+                    if (volume === "1") {
+                        //시간
+                        if (time !== "0") {
+                            timeResult = ORDER_VOLUME_TIME[Number(time)];
+                        } else {
+                            alert("작업 종류 > 시간을 선택해주세요.");
+                            return;
+                        }
+                    } else if (volume === "2") {
+                        //물량
+                        if (quantity !== "0") {
+                            quantityResult =
+                                ORDER_VOLUME_QUANTITY[Number(quantity)];
+                        } else {
+                            alert("작업 종류 > 물량을 선택해주세요.");
+                            return;
+                        }
+                    }
+                    if (direction === "3") {
+                        //양사
+                        if (downFloor !== "0") {
+                            downFloorResult =
+                                volume === "1"
+                                    ? LADDER_FLOOR[0][Number(downFloor)]
+                                    : LADDER_FLOOR[1][Number(downFloor)];
+                        } else {
+                            alert("작업 종류 > 내림 층 수를 선택해주세요.");
+                            return;
+                        }
+                        if (upFloor !== "0") {
+                            upFloorResult =
+                                volume === "1"
+                                    ? LADDER_FLOOR[0][Number(upFloor)]
+                                    : LADDER_FLOOR[1][Number(upFloor)];
+                        } else {
+                            alert("작업 종류 > 올림 층 수를 선택해주세요.");
+                            return;
+                        }
+                    } else if (direction === "1" || direction === "2") {
+                        //올림, 내림
+                        if (floor !== "0") {
+                            floorResult =
+                                volume === "1"
+                                    ? LADDER_FLOOR[0][Number(floor)]
+                                    : LADDER_FLOOR[1][Number(floor)];
+                        } else {
+                            alert("작업 종류 > 층 수를 선택해주세요.");
+                            return;
+                        }
+                    }
+                } else {
+                    alert("작업 종류 > 작업량을 선택해주세요.");
+                    return;
+                }
+            } else {
+                alert("작업 종류 > 방향을 선택해주세요.");
+                return;
+            }
+        } else if (orderType === "2") {
+            //스카이차
+            if (floor !== "0") {
+                skyFloorResult = SKY_OPTION[Number(floor)];
+
+                if (skyTime !== "0") {
+                    if (Number(floor) <= 5) {
+                        skyTimeResult = SKY_TIME[1][Number(skyTime)];
+                    } else if (Number(floor) > 5) {
+                        skyTimeResult = SKY_TIME[0][Number(skyTime)];
+                    }
+                } else {
+                    alert("작업 종류 > 작업 시간을 선택해주세요.");
+                    return;
+                }
+            } else {
+                alert("작업 종류 > 작업 높이를 선택해주세요.");
+                return;
+            }
+        }
+
+        const orderStatusResult =
+            orderStatus === "0" ? null : Number(orderStatus);
+
+        const priceStatusResult = price.length === 0 ? null : Number(price);
+        const memoResult = memo.length === 0 ? null : memo;
+        const directPhoneResult = directPhone.length === 0 ? null : directPhone;
+
+        const sendingData = {
+            registUser: registUserResult ? registUserResult : null,
+            registDateTime: registDateTimeResult ? registDateTime : null,
+            workDateTime: workDateTimeResult ? workDateTime : null,
+            address1: address1Result ? address1 : null,
+            detailAddress1: address1Result ? detailAddress1 : null,
+            simpleAddress1: address1Result ? simpleAddress1 : null,
+            address2: address2Result ? address2 : null,
+            detailAddress2: address2Result ? detailAddress2 : null,
+            simpleAddress2: address2Result ? simpleAddress2 : null,
+            orderType: orderTypeResult,
+            direction: directionResult,
+            volume: volumeResult,
+            time: timeResult,
+            quantity: quantityResult,
+            floor: floorResult,
+            downFloor: downFloorResult,
+            upFloor: upFloorResult,
+            skyTime: skyTimeResult,
+            skyFloor: skyFloorResult,
+            orderStatus: orderStatusResult,
+            price: priceStatusResult,
+            memo: memoResult,
+            directPhone: directPhoneResult,
+            latitude: latitude1,
+            longitude: longitude1,
         };
 
-        return (
-            <CalendarComponent>
-                <ReactCalendar
-                    calendarType="US"
-                    onChange={onChange}
-                    value={getValues("originalRegistDate")}
-                    showNeighboringMonth={true}
-                    formatDay={(locale, date) => moment(date).format("DD")}
-                    tileContent={({ date, view }) => {
-                        let html = [];
+        console.log("sendingData : ", sendingData);
 
-                        return (
-                            <div key={date} className="contents">
-                                {html}
-                            </div>
-                        );
-                    }}
-                />
-            </CalendarComponent>
-        );
+        updateOrder(sendingData);
     };
-    const onValid = (data) => {
-        console.log(data);
+
+    const getUser = async (data) => {
+        try {
+            const response = await axios.get(SERVER + "/admin/user", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+                params: { id: data },
+            });
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (error) {
+            return false;
+        }
+    };
+
+    const updateOrder = async (data) => {
+        try {
+            const response = await axios.patch(SERVER + "/admin/order/update", {
+                ...data,
+                orderId: order.id,
+            });
+
+            const {
+                data: {
+                    data: { updatedOrder: orders },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(orders);
+
+            if (result === VALID) {
+                setUpdatedOrder(orders);
+                setOrder(orders);
+                setModifyMode(false);
+            } else alert(msg);
+        } catch (error) {
+            console.log(error);
+        }
     };
 
     return (
         <>
-            {true ? (
+            {order ? (
                 <Container>
                     <div style={{ width: "100%" }}>
                         <LinkText onClick={Reset}>작업정보 검색</LinkText> {">"}{" "}
@@ -265,12 +584,13 @@ function OrderDetail({ onClose, data: order }) {
                                                     ) : null}
                                                 </>
                                             ) : (
-                                                GetDateTime(order.dateTime)
+                                                GetMinusDateTime(order.dateTime)
                                             )}
                                         </td>
                                         <th>등록일시</th>
                                         <td>
-                                            {modifyMode ? (
+                                            {GetDateTime(order.createdAt)}
+                                            {/* {modifyMode ? (
                                                 <>
                                                     {" "}
                                                     <input
@@ -306,7 +626,7 @@ function OrderDetail({ onClose, data: order }) {
                                                 </>
                                             ) : (
                                                 GetDateTime(order.createdAt)
-                                            )}
+                                            )} */}
                                         </td>
                                     </tr>
                                     <tr>
@@ -353,6 +673,8 @@ function OrderDetail({ onClose, data: order }) {
                                                         }}
                                                         placeholder={
                                                             order.address2
+                                                                ? order.address2
+                                                                : "주소"
                                                         }
                                                         {...register(
                                                             "address2"
@@ -364,16 +686,20 @@ function OrderDetail({ onClose, data: order }) {
                                                         }}
                                                         placeholder={
                                                             order.detailAddress2
+                                                                ? order.detailAddress2
+                                                                : "상세 주소"
                                                         }
                                                         {...register(
                                                             "detailAddress2"
                                                         )}
                                                     />
                                                 </>
-                                            ) : (
+                                            ) : order.address2 ? (
                                                 order.address2 +
                                                 " " +
                                                 order.detailAddress2
+                                            ) : (
+                                                "-"
                                             )}
                                         </td>
                                     </tr>
@@ -405,7 +731,9 @@ function OrderDetail({ onClose, data: order }) {
                                                     </select>
                                                     <Blank />
                                                     {watch("orderType") ===
-                                                    "0" ? null : watch(
+                                                        "0" ||
+                                                    watch("orderType") ===
+                                                        null ? null : watch(
                                                           "orderType"
                                                       ) === "1" ? (
                                                         <>
@@ -462,6 +790,65 @@ function OrderDetail({ onClose, data: order }) {
                                                                     )
                                                                 )}
                                                             </select>
+                                                            <Blank />
+                                                            {watch("volume") ===
+                                                            "1" ? (
+                                                                <select
+                                                                    name="time"
+                                                                    {...register(
+                                                                        "time"
+                                                                    )}
+                                                                >
+                                                                    {ORDER_VOLUME_TIME.map(
+                                                                        (
+                                                                            value,
+                                                                            index
+                                                                        ) => (
+                                                                            <option
+                                                                                value={
+                                                                                    index
+                                                                                }
+                                                                                key={
+                                                                                    index
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    value
+                                                                                }
+                                                                            </option>
+                                                                        )
+                                                                    )}
+                                                                </select>
+                                                            ) : null}
+                                                            {watch("volume") ===
+                                                            "2" ? (
+                                                                <select
+                                                                    name="quantity"
+                                                                    {...register(
+                                                                        "quantity"
+                                                                    )}
+                                                                >
+                                                                    {ORDER_VOLUME_QUANTITY.map(
+                                                                        (
+                                                                            value,
+                                                                            index
+                                                                        ) => (
+                                                                            <option
+                                                                                value={
+                                                                                    index
+                                                                                }
+                                                                                key={
+                                                                                    index
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    value
+                                                                                }
+                                                                            </option>
+                                                                        )
+                                                                    )}
+                                                                </select>
+                                                            ) : null}
                                                             {watch("volume") ===
                                                             "1" ? (
                                                                 watch(
@@ -807,6 +1194,9 @@ function OrderDetail({ onClose, data: order }) {
                                                 <input
                                                     style={{ width: "100%" }}
                                                     {...register("memo")}
+                                                    defaultValue={
+                                                        order ? order.memo : ""
+                                                    }
                                                 />
                                             ) : order.memo ? (
                                                 order.memo
@@ -830,6 +1220,7 @@ function OrderDetail({ onClose, data: order }) {
                                                     placeholder={
                                                         order.directPhone
                                                     }
+                                                    {...register("directPhone")}
                                                 />
                                             ) : order.directPhone ? (
                                                 GetPhoneNumberWithDash(
@@ -882,7 +1273,10 @@ function OrderDetail({ onClose, data: order }) {
 
                                 <Blank />
                                 <Blank />
-                                <PointButton type="button" onClick={onClose}>
+                                <PointButton
+                                    type="button"
+                                    onClick={() => onClose(updatedOrder)}
+                                >
                                     닫기
                                 </PointButton>
                             </Buttons>
