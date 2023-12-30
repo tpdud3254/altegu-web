@@ -603,9 +603,10 @@ function UserDetails({ data, onClose }) {
         console.log(vehicle);
 
         try {
-            const response = await axios.patch(SERVER + "/admin/vehicle", {
-                vehicleId: userData.vehicle[0].id,
+            const response = await axios.post(SERVER + "/admin/vehicle", {
+                vehicleId: userData?.vehicle[0]?.id || null,
                 vehicle,
+                userId: userData.id,
             });
 
             const {
