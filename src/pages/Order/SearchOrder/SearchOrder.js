@@ -122,7 +122,7 @@ function SearchOrder() {
                         {getOrderId(value)}
                     </LinkText>
                 ),
-                registDate: GetDateTime(value.createdAt),
+                registDate: GetMinusDateTime(value.createdAt),
                 workingDateTime: value.dateTime
                     ? GetMinusDateTime(value.dateTime)
                     : "-",
