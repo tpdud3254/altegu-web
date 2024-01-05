@@ -9,7 +9,7 @@ import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import { Blank } from "../../../components/Blank";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
 import axios from "axios";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 import {
     GetDate,
     GetDateTime,

@@ -10,7 +10,7 @@ import {
     VALID,
     WORK_CATEGORY,
     WORK_CATEGORY_TEXT,
-} from "../../../contant";
+} from "../../../constant";
 import {
     GetAge,
     GetDate,

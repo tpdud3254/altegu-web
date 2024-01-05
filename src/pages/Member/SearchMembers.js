@@ -5,7 +5,7 @@ import Modal from "../../components/Modal";
 import { HorizontalTable } from "../../components/Table/HorizontalTable";
 import MemberDetail from "./MemberDetail";
 import axios from "axios";
-import { SERVER, VALID } from "../../contant";
+import { SERVER, VALID } from "../../constant";
 import {
     GetAge,
     GetDateTime,

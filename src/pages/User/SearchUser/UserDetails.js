@@ -19,7 +19,7 @@ import { PointButton } from "../../../components/Button/PointButton";
 import { LinkText } from "../../../components/Text/LinkText";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import axios from "axios";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 import Modal from "../../../components/Modal";
 import { useForm } from "react-hook-form";
 

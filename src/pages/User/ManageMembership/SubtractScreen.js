@@ -15,7 +15,7 @@ import { Blank } from "../../../components/Blank";
 import { PointButton } from "../../../components/Button/PointButton";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
 import axios from "axios";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 
 const Container = styled.div`
     width: 100%;

@@ -28,7 +28,7 @@ import {
     SKY_OPTION,
     SKY_TIME,
     VALID,
-} from "../../../contant";
+} from "../../../constant";
 import axios from "axios";
 
 const Container = styled.div`

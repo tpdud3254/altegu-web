@@ -11,7 +11,7 @@ import {
     Reload,
     Reset,
 } from "../../../utils/utils";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 import axios from "axios";
 import { ORDER_TABLE_COL } from "./table";
 import MainLayout from "../../../components/Layout/MainLayout";

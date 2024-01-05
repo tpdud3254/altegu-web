@@ -16,7 +16,7 @@ import Table from "../../../components/Table/Table";
 import { LinkText } from "../../../components/Text/LinkText";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import axios from "axios";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 
 const Container = styled.div`
     width: 100%;

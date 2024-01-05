@@ -15,7 +15,7 @@ import { Blank } from "../../../components/Blank";
 import { PointButton } from "../../../components/Button/PointButton";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
 import axios from "axios";
-import { SERVER, VALID } from "../../../contant";
+import { SERVER, VALID } from "../../../constant";
 
 const Container = styled.div`
     width: 100%;
@@ -145,14 +145,14 @@ function SubtractScreen({ data, onClose }) {
             console.log(points);
 
             if (result === VALID) {
-                alert("통신비 차감에 성공하였습니다.");
+                alert("포인트 차감에 성공하였습니다.");
                 Reload();
             } else {
                 console.log("onModifyPoint invalid");
-                alert("통신비 차감에 실패하였습니다.");
+                alert("포인트 차감에 실패하였습니다.");
             }
         } catch (error) {
-            alert("통신비 차감에 실패하였습니다.");
+            alert("포인트 차감에 실패하였습니다.");
             console.log("onModifyPoint error : ", error);
         } finally {
             setProcessing(false);

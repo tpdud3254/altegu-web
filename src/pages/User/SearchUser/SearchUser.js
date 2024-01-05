@@ -21,7 +21,7 @@ import {
     VALID,
     USER_TYPE_TEXT,
     WORK_CATEGORY_TEXT,
-} from "../../../contant";
+} from "../../../constant";
 import {
     GetUserType,
     GetAge,
@@ -962,16 +962,18 @@ function SearchUser() {
                                 <div>
                                     <button
                                         type="button"
-                                        onClick={onSubtractPoint}
+                                        onClick={() => {}}
+                                        // onClick={onSubtractPoint}
+                                        disabled
                                     >
-                                        통신비 차감
+                                        포인트 차감
                                     </button>
                                     <Blank />
                                     <button
                                         type="button"
                                         onClick={openDeleteUser}
                                     >
-                                        데이터 삭제
+                                        회원 탈퇴
                                     </button>
                                 </div>
                             </ResultWrapper>
