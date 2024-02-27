@@ -744,6 +744,9 @@ function SearchUser() {
         const startDate = new Date(originalStartDate);
         const endDate = new Date(originalEndDate);
 
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+
         const sendData = {
             name: name ? name : null,
             phone: phone ? phone : null,

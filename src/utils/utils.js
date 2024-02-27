@@ -9,25 +9,14 @@ const getMin = (min) => `${min < 10 ? "0" + min : min}`;
 export const GetDateTime = (dateTime) => {
     const newDateTime = new Date(dateTime);
 
-    // const kr_datetime = newDateTime.setHours(newDateTime.getHours() - 9);
-
-    // const result = new Date(kr_datetime);
-
-    return `${newDateTime.getFullYear().toString().substring(2, 4)}.${getMonth(
-        newDateTime.getMonth()
-    )}.${getDate(newDateTime.getDate())} ${getHours(
-        newDateTime.getHours()
-    )}:${getMin(newDateTime.getMinutes())}`;
-};
-
-export const GetCurrentDateTime = () => {
-    const curr = new Date();
-
-    const kr_curr = curr.setHours(curr.getHours() + 9);
-
-    const result = new Date(kr_curr);
-
-    return result;
+    return `${newDateTime
+        .getUTCFullYear()
+        .toString()
+        .substring(2, 4)}.${getMonth(newDateTime.getUTCMonth())}.${getDate(
+        newDateTime.getUTCDate()
+    )} ${getHours(newDateTime.getUTCHours())}:${getMin(
+        newDateTime.getUTCMinutes()
+    )}`;
 };
 
 export const GetMinusDateTime = (dateTime) => {
@@ -61,13 +50,12 @@ export const GetMinusDate = (dateTime) => {
 export const GetDate = (dateTime) => {
     const newDateTime = new Date(dateTime);
 
-    // const kr_datetime = newDateTime.setHours(newDateTime.getHours() - 9);
-
-    // const result = new Date(kr_datetime);
-
-    return `${newDateTime.getFullYear().toString().substring(2, 4)}.${getMonth(
-        newDateTime.getMonth()
-    )}.${getDate(newDateTime.getDate())}`;
+    return `${newDateTime
+        .getUTCFullYear()
+        .toString()
+        .substring(2, 4)}.${getMonth(newDateTime.getUTCMonth())}.${getDate(
+        newDateTime.getUTCDate()
+    )}`;
 };
 
 export const numberWithZero = (num) => {

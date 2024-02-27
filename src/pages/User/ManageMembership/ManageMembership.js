@@ -436,6 +436,12 @@ function ManageMembership() {
         const membershipStartDate = new Date(originalMembershipStartDate);
         const membershipEndDate = new Date(originalMembershipEndDate);
 
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+
+        membershipStartDate.setHours(0, 0, 0, 0);
+        membershipEndDate.setHours(23, 59, 0, 0);
+
         const sendData = {
             name: name ? name : null,
             phone: phone ? phone : null,

@@ -238,15 +238,23 @@ function WithdrawalList() {
         } else {
             name = searchData;
         }
+
         console.log(Number(searchData), typeof Number(searchData));
 
+        const startDate = new Date(originalStartDate);
+        const endDate = new Date(originalEndDate);
+
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+
         const sendData = {
-            startDate: originalStartDate ? originalStartDate : null,
-            endDate: originalEndDate ? originalEndDate : null,
+            startDate: originalStartDate ? startDate : null,
+            endDate: originalEndDate ? endDate : null,
             name: name ? name : null,
             userId: userId ? Number(userId) : null,
             phone: phone ? phone : null,
         };
+
         console.log(sendData);
         getWithdrawalList(sendData);
     };

@@ -122,7 +122,7 @@ function SearchOrder() {
                         {getOrderId(value)}
                     </LinkText>
                 ),
-                registDate: GetMinusDateTime(value.createdAt),
+                registDate: GetDateTime(value.createdAt),
                 workingDateTime: value.dateTime
                     ? GetMinusDateTime(value.dateTime)
                     : "-",
@@ -340,6 +340,7 @@ function SearchOrder() {
                 }}
             >
                 <div>{GetDateTime(orderData[orderIndex].dateTime)}</div>
+                {/* DEVELOP: timezone */}
                 <div>{orderData[orderIndex].simpleAddress1}</div>
                 <div>
                     [{orderData[orderIndex].vehicleType}]{" "}
@@ -410,6 +411,12 @@ function SearchOrder() {
             originalStartDate,
         } = data;
 
+        const startDate = new Date(originalStartDate);
+        const endDate = new Date(originalEndDate);
+
+        startDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 0, 0);
+
         const sendData = {
             orderId: orderId ? orderId.substring(6, orderId.length) : null,
             acceptUser: acceptUser ? acceptUser : null,
@@ -422,8 +429,8 @@ function SearchOrder() {
                         : "스카이차"
                     : null,
             region: region ? region : null,
-            startDate: originalStartDate ? originalStartDate : null,
-            endDate: originalEndDate ? originalEndDate : null,
+            startDate: originalStartDate ? startDate : null,
+            endDate: originalEndDate ? endDate : null,
         };
 
         console.log(sendData);
@@ -505,7 +512,7 @@ function SearchOrder() {
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>기간</th>
+                                        <th>기간(작업일시)</th>
                                         <td>
                                             <input
                                                 disabled
