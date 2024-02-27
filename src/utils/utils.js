@@ -1,3 +1,8 @@
+export const Login = async (setIsLoggedIn, token) => {
+    setIsLoggedIn(true);
+    localStorage.setItem("TOKEN", token);
+};
+
 const getMonth = (month) => `${month + 1 < 10 ? "0" + (month + 1) : month + 1}`;
 
 const getDate = (date) => `${date < 10 ? "0" + date : date}`;
@@ -19,21 +24,8 @@ export const GetDateTime = (dateTime) => {
     )}`;
 };
 
-export const GetMinusDateTime = (dateTime) => {
-    const curr = new Date(dateTime);
-
-    const kr_curr = curr.setHours(curr.getHours() - 9);
-
-    const result = new Date(kr_curr);
-
-    return `${result.getFullYear().toString().substring(2, 4)}.${getMonth(
-        result.getMonth()
-    )}.${getDate(result.getDate())} ${getHours(result.getHours())}:${getMin(
-        result.getMinutes()
-    )}`;
-};
-
-export const GetMinusDate = (dateTime) => {
+export const GetOrderSerialNumber = (dateTime) => {
+    //작업 관리  > 작업 번호
     const curr = new Date(dateTime);
 
     const kr_curr = curr.setHours(curr.getHours() - 9);
@@ -58,6 +50,13 @@ export const GetDate = (dateTime) => {
     )}`;
 };
 
+export const GetCalendarDateText = (dateTime) => {
+    const newDateTime = new Date(dateTime);
+
+    return `${newDateTime.getFullYear().toString().substring(2, 4)}.${getMonth(
+        newDateTime.getMonth()
+    )}.${getDate(newDateTime.getDate())}`;
+};
 export const numberWithZero = (num) => {
     return num < 10 ? "0" + num : num;
 };

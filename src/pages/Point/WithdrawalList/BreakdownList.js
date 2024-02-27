@@ -11,10 +11,9 @@ import { DefaultButton } from "../../../components/Button/DefaultButton";
 import axios from "axios";
 import { SERVER, VALID } from "../../../constant";
 import {
+    GetCalendarDateText,
     GetDate,
-    GetDateTime,
     GetPhoneNumberWithDash,
-    GetUserType,
     NumberWithComma,
 } from "../../../utils/utils";
 import { BREAKDOWN_TABLE_COL, WITHDRAWALTABLE_COL } from "./table";
@@ -136,20 +135,24 @@ function BreakdownList() {
                 }
                 setValue("originalStartDate", data);
             } else {
-                const startDate = new Date(getValues("originalStartDate"));
-
                 if (!getValues("originalStartDate")) {
                     alert("시작 날짜를 골라주세요.");
                     setShowEndCalendar(false);
                     return;
                 }
+                const startDate = new Date(getValues("originalStartDate"));
+
                 if (startDate > data) {
                     alert("시작 날짜 이후의 날짜를 골라주세요.");
                     return;
                 }
-                setValue("originalEndDate", data);
+
+                const endDate = new Date(data);
+                endDate.setHours(23, 59, 0, 0);
+                setValue("originalEndDate", endDate);
             }
-            setValue(value, GetDate(data));
+
+            setValue(value, GetCalendarDateText(data));
             setShowEndCalendar(false);
             setShowStartCalendar(false);
         };

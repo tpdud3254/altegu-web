@@ -3,8 +3,7 @@ import { LinkText } from "../../../components/Text/LinkText";
 import {
     GetDate,
     GetDateTime,
-    GetMinusDate,
-    GetMinusDateTime,
+    GetOrderSerialNumber,
     GetPhoneNumberWithDash,
     NumberWithComma,
     Reload,
@@ -86,7 +85,7 @@ function OrderDetail({ onClose, data }) {
     }, [modifyMode]);
 
     const getOrderId = (value) => {
-        const datetime = GetMinusDate(value.dateTime);
+        const datetime = GetOrderSerialNumber(value.dateTime);
 
         return datetime + value.id;
     };
@@ -607,7 +606,7 @@ function OrderDetail({ onClose, data }) {
                                                     ) : null}
                                                 </>
                                             ) : (
-                                                GetMinusDateTime(order.dateTime)
+                                                GetDateTime(order.dateTime)
                                             )}
                                         </td>
                                         <th>등록일시</th>

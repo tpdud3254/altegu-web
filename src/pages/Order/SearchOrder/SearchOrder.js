@@ -3,10 +3,10 @@ import { useForm } from "react-hook-form";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
 import {
+    GetCalendarDateText,
     GetDate,
     GetDateTime,
-    GetMinusDate,
-    GetMinusDateTime,
+    GetOrderSerialNumber,
     NumberWithComma,
     Reload,
     Reset,
@@ -104,7 +104,7 @@ function SearchOrder() {
                 setOrderData(orders);
                 setTableData(getTableData(orders));
             } else {
-                console.log("getUsers invalid");
+                console.log("getOrders invalid");
                 setOrderData([]);
             }
         } catch (error) {
@@ -124,7 +124,7 @@ function SearchOrder() {
                 ),
                 registDate: GetDateTime(value.createdAt),
                 workingDateTime: value.dateTime
-                    ? GetMinusDateTime(value.dateTime)
+                    ? GetDateTime(value.dateTime)
                     : "-",
                 address: getAddress(value),
                 registUser: getName(value.registUser.id, value.registUser.name),
@@ -148,7 +148,7 @@ function SearchOrder() {
     );
 
     const getOrderId = (value) => {
-        const datetime = GetMinusDate(value.dateTime);
+        const datetime = GetOrderSerialNumber(value.dateTime);
 
         return datetime + value.id;
     };
@@ -212,26 +212,27 @@ function SearchOrder() {
             const now = new Date();
 
             if (value === "startDate") {
-                if (now < data) {
-                    alert("현재 날짜 이전의 날짜를 골라주세요.");
-                    return;
-                }
                 setValue("originalStartDate", data);
             } else {
-                const startDate = new Date(getValues("originalStartDate"));
-
                 if (!getValues("originalStartDate")) {
                     alert("시작 날짜를 골라주세요.");
                     setShowEndCalendar(false);
                     return;
                 }
+
+                const startDate = new Date(getValues("originalStartDate"));
+
                 if (startDate > data) {
                     alert("시작 날짜 이후의 날짜를 골라주세요.");
                     return;
                 }
-                setValue("originalEndDate", data);
+
+                const endDate = new Date(data);
+                endDate.setHours(23, 59, 0, 0);
+                setValue("originalEndDate", endDate);
             }
-            setValue(value, GetDate(data));
+
+            setValue(value, GetCalendarDateText(data));
             setShowEndCalendar(false);
             setShowStartCalendar(false);
         };
@@ -273,7 +274,7 @@ function SearchOrder() {
 
             prev1[orderIndex].registDate = GetDateTime(data.createdAt);
             prev1[orderIndex].workingDateTime = data.dateTime
-                ? GetMinusDateTime(data.dateTime)
+                ? GetDateTime(data.dateTime)
                 : "-";
             prev1[orderIndex].address = getAddress(data);
             prev1[orderIndex].registUser = getName(
