@@ -21,6 +21,7 @@ import {
     VALID,
     USER_TYPE_TEXT,
     WORK_CATEGORY_TEXT,
+    R_PACK_STATUS,
 } from "../../../constant";
 import {
     GetUserType,
@@ -164,7 +165,6 @@ function SearchUser() {
                         : value.membership
                         ? GetUserType(value.userTypeId) + " (정회원)"
                         : GetUserType(value.userTypeId),
-                region: value.accessedRegion,
                 license:
                     value.userTypeId === 1 ? "-" : getLicense(index, value),
                 point: value.point
@@ -174,6 +174,7 @@ function SearchUser() {
                 withdrawalDate: value.withdrawalDate
                     ? GetDateTime(value.withdrawalDate)
                     : "-",
+                rPack: value.r_pack ? "회원" : "",
             });
         });
         return result;
@@ -741,9 +742,9 @@ function SearchUser() {
             originalStartDate,
             phone,
             status,
-            region,
             userType,
             workCategory,
+            rPackStatus,
         } = data;
 
         const startDate = new Date(originalStartDate);
@@ -762,7 +763,8 @@ function SearchUser() {
             userTypeId: USER_TYPE[userType],
             workCategoryId:
                 USER_TYPE[userType] === 3 ? WORK_CATEGORY[workCategory] : null,
-            region: region ? region : null,
+            rPackStatus:
+                rPackStatus && rPackStatus !== "all" ? rPackStatus : null,
         };
 
         console.log("sendData : ", sendData);
@@ -945,9 +947,27 @@ function SearchUser() {
                                                 </select>
                                             ) : null}
                                         </td>
-                                        <th>접속지역</th>
+                                        <th>알팩 가입 여부</th>
                                         <td>
-                                            <input {...register("region")} />
+                                            <select
+                                                name="rPackStatus"
+                                                {...register("rPackStatus")}
+                                            >
+                                                {Object.keys(R_PACK_STATUS).map(
+                                                    (value, index) => (
+                                                        <option
+                                                            value={value}
+                                                            key={index}
+                                                        >
+                                                            {value === "all"
+                                                                ? "전체"
+                                                                : R_PACK_STATUS[
+                                                                      value
+                                                                  ]}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
                                         </td>
                                     </tr>
                                 </tbody>

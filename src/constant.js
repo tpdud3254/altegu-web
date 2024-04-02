@@ -1,5 +1,5 @@
-export const SERVER = process.env.REACT_APP_SERVER;
-// export const SERVER = "http://localhost:4000";
+// export const SERVER = process.env.REACT_APP_SERVER;
+export const SERVER = "http://localhost:4000";
 export const VALID = "VALID";
 
 export const GENDER = { all: null, male: "남", female: "여" };
@@ -14,6 +14,12 @@ export const USER_TYPE = {
     company: 3,
     normal: 1,
     driver: 2,
+};
+
+export const R_PACK_STATUS = {
+    all: null,
+    member: "회원",
+    "non-member": "비회원",
 };
 
 export const USER_TYPE_TEXT = {
