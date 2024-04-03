@@ -16,7 +16,7 @@ export const USER_TYPE = {
     driver: 2,
 };
 
-export const R_PACK_STATUS = {
+export const GUGUPACK_STATUS = {
     all: null,
     member: "회원",
     "non-member": "비회원",

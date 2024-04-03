@@ -21,7 +21,7 @@ import {
     VALID,
     USER_TYPE_TEXT,
     WORK_CATEGORY_TEXT,
-    R_PACK_STATUS,
+    GUGUPACK_STATUS,
 } from "../../../constant";
 import {
     GetUserType,
@@ -174,7 +174,7 @@ function SearchUser() {
                 withdrawalDate: value.withdrawalDate
                     ? GetDateTime(value.withdrawalDate)
                     : "-",
-                rPack: value.r_pack ? "회원" : "",
+                gugupack: value.gugupack ? "회원" : "",
             });
         });
         return result;
@@ -744,7 +744,7 @@ function SearchUser() {
             status,
             userType,
             workCategory,
-            rPackStatus,
+            gugupackStatus,
         } = data;
 
         const startDate = new Date(originalStartDate);
@@ -763,8 +763,10 @@ function SearchUser() {
             userTypeId: USER_TYPE[userType],
             workCategoryId:
                 USER_TYPE[userType] === 3 ? WORK_CATEGORY[workCategory] : null,
-            rPackStatus:
-                rPackStatus && rPackStatus !== "all" ? rPackStatus : null,
+            gugupackStatus:
+                gugupackStatus && gugupackStatus !== "all"
+                    ? gugupackStatus
+                    : null,
         };
 
         console.log("sendData : ", sendData);
@@ -947,26 +949,26 @@ function SearchUser() {
                                                 </select>
                                             ) : null}
                                         </td>
-                                        <th>알팩 가입 여부</th>
+                                        <th>구구팩 가입 여부</th>
                                         <td>
                                             <select
-                                                name="rPackStatus"
-                                                {...register("rPackStatus")}
+                                                name="gugupackStatus"
+                                                {...register("gugupackStatus")}
                                             >
-                                                {Object.keys(R_PACK_STATUS).map(
-                                                    (value, index) => (
-                                                        <option
-                                                            value={value}
-                                                            key={index}
-                                                        >
-                                                            {value === "all"
-                                                                ? "전체"
-                                                                : R_PACK_STATUS[
-                                                                      value
-                                                                  ]}
-                                                        </option>
-                                                    )
-                                                )}
+                                                {Object.keys(
+                                                    GUGUPACK_STATUS
+                                                ).map((value, index) => (
+                                                    <option
+                                                        value={value}
+                                                        key={index}
+                                                    >
+                                                        {value === "all"
+                                                            ? "전체"
+                                                            : GUGUPACK_STATUS[
+                                                                  value
+                                                              ]}
+                                                    </option>
+                                                ))}
                                             </select>
                                         </td>
                                     </tr>

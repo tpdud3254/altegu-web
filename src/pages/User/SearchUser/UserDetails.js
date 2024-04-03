@@ -842,8 +842,8 @@ function UserDetails({ data, onClose }) {
                                             ? GetUserType(userData.userTypeId) +
                                               ">" +
                                               userData.workCategory.name +
-                                              (userData.r_pack
-                                                  ? " (알팩 회원)"
+                                              (userData.gugupack
+                                                  ? " (구구팩 회원)"
                                                   : "")
                                             : GetUserType(userData.userTypeId) +
                                               (userData.membership

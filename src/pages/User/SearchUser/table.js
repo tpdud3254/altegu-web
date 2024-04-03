@@ -29,8 +29,8 @@ export const SEARCH_TABLE_COL = [
         Header: "구분",
     },
     {
-        accessor: "rPack",
-        Header: "알팩 회원",
+        accessor: "gugupack",
+        Header: "구구팩 회원",
     },
     {
         accessor: "license",
