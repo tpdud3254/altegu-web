@@ -12,6 +12,7 @@ import ManageMembership from "./pages/User/ManageMembership/ManageMembership";
 import SearchOrder from "./pages/Order/SearchOrder/SearchOrder";
 import WithdrawalList from "./pages/Point/WithdrawalList/WithdrawalList";
 import BreakdownList from "./pages/Point/WithdrawalList/BreakdownList";
+import Gugupack from "./pages/Price/Gugupack";
 
 Amplify.configure(awsExports);
 
@@ -50,6 +51,10 @@ function App() {
                     <Route
                         path={`${MENUS.POINT.route}${SUB_MENUS.POINT[1].route}`}
                         element={<BreakdownList />}
+                    />
+                    <Route
+                        path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[0].route}`}
+                        element={<Gugupack />}
                     />
                 </Routes>
             </HelmetProvider>
