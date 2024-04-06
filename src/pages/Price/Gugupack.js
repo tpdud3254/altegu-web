@@ -84,7 +84,7 @@ function Gugupack() {
 
     return (
         <MainLayout path={location.pathname}>
-            <PageTitle title="포인트 관리" />
+            <PageTitle title="금액 관리" />
             <MainContentLayout show={true}>
                 <form onSubmit={handleSubmit(onValid)}>
                     <>
