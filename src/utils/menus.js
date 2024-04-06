@@ -25,5 +25,8 @@ export const SUB_MENUS = {
         { name: "출금 신청 목록", route: "/withdraw" },
         { name: "포인트 내역 조회", route: "/breakdown" },
     ],
-    PRICE: [{ name: "구구팩 금액 관리", route: "/gugupack" }],
+    PRICE: [
+        { name: "요금표 관리", route: "/order" },
+        { name: "구구팩 금액 관리", route: "/gugupack" },
+    ],
 };

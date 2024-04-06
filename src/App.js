@@ -13,6 +13,7 @@ import SearchOrder from "./pages/Order/SearchOrder/SearchOrder";
 import WithdrawalList from "./pages/Point/WithdrawalList/WithdrawalList";
 import BreakdownList from "./pages/Point/WithdrawalList/BreakdownList";
 import Gugupack from "./pages/Price/Gugupack";
+import OrderPrice from "./pages/Price/OrderPrice";
 
 Amplify.configure(awsExports);
 
@@ -54,6 +55,10 @@ function App() {
                     />
                     <Route
                         path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[0].route}`}
+                        element={<OrderPrice />}
+                    />
+                    <Route
+                        path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[1].route}`}
                         element={<Gugupack />}
                     />
                 </Routes>
