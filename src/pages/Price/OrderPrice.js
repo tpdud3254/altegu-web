@@ -84,6 +84,18 @@ const Table = styled.table`
     input {
         width: 100px;
     }
+
+    /* Chrome, Safari, Edge, Opera */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    /* Firefox  */
+    input[type="number"] {
+        -moz-appearance: textfield;
+    }
 `;
 
 function OrderPrice() {
@@ -137,8 +149,7 @@ function OrderPrice() {
         setTab(index);
         if (tab === 1) setModifyingLadderQuantityData([...ladderQuantityTable]);
         else if (tab === 2) setModifyingLadderTimeData([...ladderTimeTable]);
-        else if (tab === 3);
-        setModifyingSkyTimeData([...skyTimeTable]);
+        else if (tab === 3) setModifyingSkyTimeData([...skyTimeTable]);
         setModifyMode(false);
     };
 
@@ -146,8 +157,7 @@ function OrderPrice() {
         e.preventDefault();
         if (tab === 1) setModifyingLadderQuantityData([...ladderQuantityTable]);
         else if (tab === 2) setModifyingLadderTimeData([...ladderTimeTable]);
-        else if (tab === 3);
-        setModifyingSkyTimeData([...skyTimeTable]);
+        else if (tab === 3) setModifyingSkyTimeData([...skyTimeTable]);
         setModifyMode(false);
     };
 
@@ -558,11 +568,13 @@ function OrderPrice() {
                                                                                 0 ? (
                                                                                     "협의"
                                                                                 ) : (
-                                                                                    ladderQuantityTable[
-                                                                                        optionIndex
-                                                                                    ][
-                                                                                        index
-                                                                                    ]
+                                                                                    NumberWithComma(
+                                                                                        ladderQuantityTable[
+                                                                                            optionIndex
+                                                                                        ][
+                                                                                            index
+                                                                                        ]
+                                                                                    )
                                                                                 )
                                                                             ) : (
                                                                                 <input
@@ -574,7 +586,7 @@ function OrderPrice() {
                                                                                             index
                                                                                         ]
                                                                                     }
-                                                                                    onChangeLadderQuantity={(
+                                                                                    onChange={(
                                                                                         e
                                                                                     ) =>
                                                                                         onChangeLadderQuantity(
@@ -647,11 +659,13 @@ function OrderPrice() {
                                                                                 0 ? (
                                                                                     "협의"
                                                                                 ) : (
-                                                                                    ladderTimeTable[
-                                                                                        optionIndex
-                                                                                    ][
-                                                                                        index
-                                                                                    ]
+                                                                                    NumberWithComma(
+                                                                                        ladderTimeTable[
+                                                                                            optionIndex
+                                                                                        ][
+                                                                                            index
+                                                                                        ]
+                                                                                    )
                                                                                 )
                                                                             ) : (
                                                                                 <input
@@ -729,11 +743,13 @@ function OrderPrice() {
                                                                                 0 ? (
                                                                                     "협의"
                                                                                 ) : (
-                                                                                    skyTimeTable[
-                                                                                        optionIndex
-                                                                                    ][
-                                                                                        index
-                                                                                    ]
+                                                                                    NumberWithComma(
+                                                                                        skyTimeTable[
+                                                                                            optionIndex
+                                                                                        ][
+                                                                                            index
+                                                                                        ]
+                                                                                    )
                                                                                 )
                                                                             ) : (
                                                                                 <input
