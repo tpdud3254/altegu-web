@@ -68,7 +68,7 @@ const Table = styled.table`
         border-right: 1px solid grey;
         vertical-align: middle;
         height: 35px;
-        width: 120px;
+        width: 100px;
     }
 
     td {
@@ -76,7 +76,6 @@ const Table = styled.table`
         text-align: left;
     }
     th {
-        padding: 0 20px 0 20px;
         font-weight: 600;
         background-color: lightgrey;
         text-align: center;
