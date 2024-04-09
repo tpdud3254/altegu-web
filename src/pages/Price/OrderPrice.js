@@ -90,11 +90,6 @@ const Table = styled.table`
         -webkit-appearance: none;
         margin: 0;
     }
-
-    /* Firefox  */
-    input[type="number"] {
-        -moz-appearance: textfield;
-    }
 `;
 
 function OrderPrice() {
