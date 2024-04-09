@@ -33,8 +33,8 @@ export const MEMBERSHIP_TABLE_COL = [
         Header: "구분",
     },
     {
-        accessor: "region",
-        Header: "접속 지역",
+        accessor: "reservationBlock",
+        Header: "임시 중지",
     },
     {
         accessor: "finalMembershipDate",

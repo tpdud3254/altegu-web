@@ -79,6 +79,8 @@ function ManageMembership() {
     const [showMembershipEndCalendar, setShowMembershipEndCalendar] =
         useState(false);
     const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+    const [showReservationBlockModal, setShowReservationBlockModal] =
+        useState(false);
 
     const [userData, setUserData] = useState([]);
     const [userIndex, setUserIndex] = useState(null);
@@ -149,7 +151,10 @@ function ManageMembership() {
                 gender: value.gender,
                 phone: GetPhoneNumberWithDash(value.phone),
                 userType: "기사",
-                region: value.accessedRegion,
+                reservationBlock: getReservationBlock(
+                    value.reservationBlock,
+                    index
+                ),
                 point: value.point
                     ? NumberWithComma(value.point.curPoint) + "AP"
                     : "0AP",
@@ -161,6 +166,20 @@ function ManageMembership() {
         });
         return result;
     };
+
+    const getReservationBlock = (block, index) => (
+        <div
+            onClick={() => openReservationBlock(index)}
+            style={{
+                textDecoration: "underline",
+                fontWeight: block ? 600 : 400,
+                color: block ? "red" : "green",
+                cursor: "pointer",
+            }}
+        >
+            {block ? "임시중지" : "정상"}
+        </div>
+    );
 
     const getStatus = (membership, status) => {
         if (membership) return "정회원";
@@ -346,6 +365,80 @@ function ManageMembership() {
         if (selectedArr.length === 0) return;
 
         openSubtractScreen();
+    };
+
+    const closeReservationBlockModal = () => {
+        setUserIndex(null);
+        setShowReservationBlockModal(false);
+    };
+
+    const openReservationBlock = (index) => {
+        setUserIndex(index);
+        setShowReservationBlockModal(true);
+    };
+
+    const ReservationBlockModal = () => (
+        <Modal
+            open={openReservationBlock}
+            close={closeReservationBlockModal}
+            header="임시중지 여부 수정"
+        >
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                회원코드 : {userData[userIndex].id}
+            </div>
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                이름 : {userData[userIndex].name}
+            </div>
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                연락처 : {userData[userIndex].phone}
+            </div>
+            <div style={{ marginTop: 20, marginBottom: 20 }}>
+                {userData[userIndex].reservationBlock
+                    ? "'정상' 상태로 변경하시겠습니까?"
+                    : "'이용중지' 상태로 변경하시겠습니까?"}
+            </div>
+            <DefaultButton type="button" onClick={onSetReservationBlock}>
+                변경하기
+            </DefaultButton>
+        </Modal>
+    );
+
+    const onSetReservationBlock = async () => {
+        const userId = userData[userIndex].id;
+
+        console.log(userId);
+
+        try {
+            const response = await axios.patch(SERVER + "/admin/user/block", {
+                id: userId,
+                blockStatus: userData[userIndex].reservationBlock
+                    ? false
+                    : true,
+            });
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(user);
+
+            if (result === VALID) {
+                console.log("onSetReservationBlock valid");
+                Reload();
+                setUserIndex(null);
+                closeReservationBlockModal();
+            } else {
+                console.log("onSetReservationBlock invalid");
+                alert("임시중지 상태 변경에 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("임시중지 상태 변경에 실패하였습니다.");
+            console.log("onSetReservationBlock error : ", error);
+        }
     };
 
     const openDeleteUserModal = async () => {
@@ -672,10 +765,8 @@ function ManageMembership() {
                                                 </select>
                                             ) : null}
                                         </td>
-                                        <th>접속지역</th>
-                                        <td>
-                                            <input {...register("region")} />
-                                        </td>
+                                        <th></th>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </HorizontalTable>
@@ -720,6 +811,9 @@ function ManageMembership() {
                             ) : null}
                         </ResultContainer>
                         {showDeleteUserModal ? <DeleteUserModal /> : null}
+                        {showReservationBlockModal ? (
+                            <ReservationBlockModal />
+                        ) : null}
                     </>
                 </form>
             </MainContentLayout>
