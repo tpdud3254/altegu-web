@@ -14,6 +14,7 @@ import WithdrawalList from "./pages/Point/WithdrawalList/WithdrawalList";
 import BreakdownList from "./pages/Point/WithdrawalList/BreakdownList";
 import Gugupack from "./pages/Price/Gugupack";
 import OrderPrice from "./pages/Price/OrderPrice";
+import ManageBanner from "./pages/Image/Banner";
 
 Amplify.configure(awsExports);
 
@@ -60,6 +61,10 @@ function App() {
                     <Route
                         path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[1].route}`}
                         element={<Gugupack />}
+                    />
+                    <Route
+                        path={`${MENUS.IMAGE.route}${SUB_MENUS.IMAGE[0].route}`}
+                        element={<ManageBanner />}
                     />
                 </Routes>
             </HelmetProvider>

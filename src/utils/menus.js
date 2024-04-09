@@ -13,6 +13,7 @@ export const MENUS = {
     ORDER: { name: "작업관리", route: "/order" },
     POINT: { name: "포인트관리", route: "/point" },
     PRICE: { name: "금액관리", route: "/price" },
+    IMAGE: { name: "이미지관리", route: "/image" },
 };
 
 export const SUB_MENUS = {
@@ -29,4 +30,5 @@ export const SUB_MENUS = {
         { name: "요금표 관리", route: "/order" },
         { name: "구구팩 금액 관리", route: "/gugupack" },
     ],
+    IMAGE: [{ name: "배너 관리", route: "/banner" }],
 };
