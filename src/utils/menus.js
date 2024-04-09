@@ -30,5 +30,8 @@ export const SUB_MENUS = {
         { name: "요금표 관리", route: "/order" },
         { name: "구구팩 금액 관리", route: "/gugupack" },
     ],
-    IMAGE: [{ name: "배너 관리", route: "/banner" }],
+    IMAGE: [
+        { name: "배너 관리", route: "/banner" },
+        { name: "팝업 관리", route: "/popup" },
+    ],
 };
