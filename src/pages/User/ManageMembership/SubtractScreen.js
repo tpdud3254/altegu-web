@@ -46,14 +46,45 @@ function SubtractScreen({ data, onClose }) {
     const [tableData, setTableData] = useState(null);
     const [block, setBlock] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [price, setPrice] = useState(0);
+
+    useEffect(() => {
+        getMembershipPrice();
+    }, []);
 
     useEffect(() => {
         const init = async () => {
             setTableData(await getTableData(data));
         };
-        console.log(data);
-        init();
-    }, []);
+
+        if (price > 0) init();
+    }, [price]);
+
+    const getMembershipPrice = async (data) => {
+        try {
+            const response = await axios.get(
+                SERVER + "/admin/price/membership",
+                {
+                    headers: {
+                        "ngrok-skip-browser-warning": true,
+                    },
+                }
+            );
+            const {
+                data: { result, data },
+            } = response;
+            console.log(response);
+            if (result === VALID) {
+                console.log(data.membershipPrice.membershipPrice);
+                setPrice(data.membershipPrice.membershipPrice);
+            } else {
+                console.log("getMembershipPrice invalid");
+                setPrice(0);
+            }
+        } catch (error) {
+            console.log("getMembershipPrice error : ", error);
+        }
+    };
 
     const getTableData = async (data) => {
         const result = [];
@@ -76,7 +107,9 @@ function SubtractScreen({ data, onClose }) {
                 curPoint: value.point
                     ? NumberWithComma(value.point.curPoint) + "AP"
                     : "0AP",
-                subtractPoint: <SubtractPoint>33,000AP</SubtractPoint>,
+                subtractPoint: (
+                    <SubtractPoint>{NumberWithComma(price)}AP</SubtractPoint>
+                ),
                 restPoint: getRestPoint(value),
             });
         });
@@ -88,7 +121,7 @@ function SubtractScreen({ data, onClose }) {
         let isBlock = false;
 
         if (value.point) {
-            if (value.point.curPoint - 33000 < 0) {
+            if (value.point.curPoint - Number(price) < 0) {
                 setBlock(true);
                 isBlock = true;
             }
@@ -99,7 +132,8 @@ function SubtractScreen({ data, onClose }) {
         return (
             <RestPoint block={isBlock}>
                 {value.point
-                    ? NumberWithComma(value.point.curPoint - 33000) + "AP"
+                    ? NumberWithComma(value.point.curPoint - Number(price)) +
+                      "AP"
                     : "-33,000AP"}
             </RestPoint>
         );
@@ -119,8 +153,8 @@ function SubtractScreen({ data, onClose }) {
                 const obj = {
                     userId: user.id,
                     pointId: user.point.id,
-                    point: Number(user.point.curPoint) - 33000,
-                    subtractPoint: 33000,
+                    point: Number(user.point.curPoint) - Number(price),
+                    subtractPoint: Number(price),
                     text: "회비 차감",
                 };
                 pointList.push(obj);

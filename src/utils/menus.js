@@ -29,6 +29,7 @@ export const SUB_MENUS = {
     PRICE: [
         { name: "요금표 관리", route: "/order" },
         { name: "구구팩 금액 관리", route: "/gugupack" },
+        { name: "정회원 금액 관리", route: "/membership" },
     ],
     IMAGE: [
         { name: "배너 관리", route: "/banner" },

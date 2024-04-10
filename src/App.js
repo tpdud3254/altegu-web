@@ -16,6 +16,7 @@ import Gugupack from "./pages/Price/Gugupack";
 import OrderPrice from "./pages/Price/OrderPrice";
 import ManageBanner from "./pages/Image/ManageBanner";
 import ManagePopup from "./pages/Image/ManagePopup";
+import MembershipPrice from "./pages/Price/MembershipPrice";
 
 Amplify.configure(awsExports);
 
@@ -62,6 +63,10 @@ function App() {
                     <Route
                         path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[1].route}`}
                         element={<Gugupack />}
+                    />
+                    <Route
+                        path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[2].route}`}
+                        element={<MembershipPrice />}
                     />
                     <Route
                         path={`${MENUS.IMAGE.route}${SUB_MENUS.IMAGE[0].route}`}
