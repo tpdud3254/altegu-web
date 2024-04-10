@@ -79,7 +79,7 @@ function ManagePopup() {
                 header="팝업 이미지 수정"
             >
                 <div>
-                    <img src={popupImageUrl} style={{ width: "50vw" }} />
+                    <img src={popupImageUrl} style={{ width: "20vw" }} />
                 </div>
                 <Buttons>
                     <input
