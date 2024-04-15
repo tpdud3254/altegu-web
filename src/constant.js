@@ -28,6 +28,26 @@ export const USER_TYPE_TEXT = {
     company: "기업",
 };
 
+export const POINT_STATUS = {
+    none: "선택",
+    charge: "충전",
+    withdrawal: "출금",
+    add: "지급",
+    subtract: "차감",
+};
+
+export const POINT_BRAKEDOWN_TEXT = {
+    0: "선택",
+    1: "통신비 차감",
+    2: "포인트 충전",
+    3: "포인트 출금",
+    4: "포인트 출금 수수료 차감",
+    5: "작업 등록 포인트 적립",
+    6: "작업 완료 포인트 적립",
+    7: "추천인 포인트 적립",
+    8: "직접 입력",
+};
+
 export const WORK_CATEGORY = {
     all: null,
     c: 1,
