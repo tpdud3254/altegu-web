@@ -44,10 +44,7 @@ export const ORDER_TABLE_COL = [
         accessor: "orderStatus",
         Header: "작업상태",
     },
-    {
-        accessor: "deposit",
-        Header: "입금상태",
-    },
+
     {
         accessor: "method",
         Header: "결제수단",

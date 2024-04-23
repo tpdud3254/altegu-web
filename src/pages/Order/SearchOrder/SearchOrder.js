@@ -134,12 +134,6 @@ function SearchOrder() {
                 memo: value.memo ? value.memo : "-",
                 acceptUser: getName(value.acceptUser, value.acceptUserName),
                 orderStatus: getOrderStatus(value, index),
-                deposit:
-                    value.method === "vbank"
-                        ? !value.standBy
-                            ? "입금 확인"
-                            : "입금 전"
-                        : "",
                 method: getMethod(value.method),
                 doneDateTime:
                     value.updatedAt &&
@@ -202,7 +196,10 @@ function SearchOrder() {
     };
 
     const getOrderStatus = (value, index) => {
-        if (value.standBy && value.orderStatusId) return "입금 대기중";
+        if (value.standBy && value.orderStatusId) {
+            if (value.orderStatusId === 1) return "입금 대기중";
+            else return "작업 취소";
+        }
         switch (value.orderStatusId) {
             case 1:
                 return "작업 요청"; //1
