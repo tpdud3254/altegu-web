@@ -1126,7 +1126,7 @@ function UserDetails({ data, onClose }) {
                                 <Table
                                     columns={columns}
                                     data={recommendData}
-                                    pagenationMode={false}
+                                    pagenationMode={true}
                                 />
                             ) : null}
                         </div>
