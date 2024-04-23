@@ -129,10 +129,18 @@ function SearchOrder() {
                 address: getAddress(value),
                 registUser: getName(value.registUser.id, value.registUser.name),
                 price: NumberWithComma(value.price),
+                gugupack: value.gugupackPrice > 0 ? "O" : "X",
                 orderType: getOrderType(value),
                 memo: value.memo ? value.memo : "-",
                 acceptUser: getName(value.acceptUser, value.acceptUserName),
                 orderStatus: getOrderStatus(value, index),
+                deposit:
+                    value.method === "vbank"
+                        ? !value.standBy
+                            ? "입금 확인"
+                            : "입금 전"
+                        : "",
+                method: getMethod(value.method),
                 doneDateTime:
                     value.updatedAt &&
                     (value.orderStatusId === 5 || value.orderStatusId === 6)
@@ -141,6 +149,21 @@ function SearchOrder() {
             });
         });
         return result;
+    };
+
+    const getMethod = (method) => {
+        switch (method) {
+            case "test":
+                return "테스트결제";
+            case "vbank":
+                return "무통장입금";
+            case "card":
+                return "카드결제";
+            case "keyedin":
+                return "수기결제";
+            default:
+                return "";
+        }
     };
 
     const getName = (index, name) => (
@@ -179,6 +202,7 @@ function SearchOrder() {
     };
 
     const getOrderStatus = (value, index) => {
+        if (value.standBy && value.orderStatusId) return "입금 대기중";
         switch (value.orderStatusId) {
             case 1:
                 return "작업 요청"; //1
@@ -493,6 +517,9 @@ function SearchOrder() {
                                                 <option value="6">
                                                     작업 취소
                                                 </option>
+                                                <option value="7">
+                                                    입금 대기중
+                                                </option>
                                             </select>
                                         </td>
                                     </tr>
@@ -585,7 +612,7 @@ function SearchOrder() {
                                     {tableData !== null
                                         ? NumberWithComma(tableData.length)
                                         : "-"}
-                                    명
+                                    건
                                 </div>
                             </ResultWrapper>
                             {tableData !== null ? (

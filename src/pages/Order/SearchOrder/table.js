@@ -25,6 +25,10 @@ export const ORDER_TABLE_COL = [
         Header: "작업비용",
     },
     {
+        accessor: "gugupack",
+        Header: "구구팩",
+    },
+    {
         accessor: "orderType",
         Header: "작업 종류",
     },
@@ -39,6 +43,14 @@ export const ORDER_TABLE_COL = [
     {
         accessor: "orderStatus",
         Header: "작업상태",
+    },
+    {
+        accessor: "deposit",
+        Header: "입금상태",
+    },
+    {
+        accessor: "method",
+        Header: "결제수단",
     },
     {
         accessor: "doneDateTime",

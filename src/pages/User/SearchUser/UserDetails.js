@@ -64,6 +64,7 @@ function UserDetails({ data, onClose }) {
         useState(false);
     const [showVehicleModal, setShowVehicleModal] = useState(false);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
+    const [showCompanyNameModal, setShowCompanyNameModal] = useState(false);
 
     const [processing, setProcessing] = useState(false);
 
@@ -812,6 +813,73 @@ function UserDetails({ data, onClose }) {
         }
     };
 
+    const openCompanyNameModal = () => {
+        setShowCompanyNameModal(true);
+    };
+    const closeCompanyNameModal = () => {
+        setShowCompanyNameModal(false);
+    };
+
+    const CompanyNameModal = () => {
+        return (
+            <Modal
+                open={openCompanyNameModal}
+                close={closeCompanyNameModal}
+                header="기업명 수정"
+            >
+                <form onSubmit={handleSubmit(onModifyCompanyName)}>
+                    <HorizontalTable>
+                        <thead></thead>
+                        <tbody>
+                            <tr>
+                                <th>기업명</th>
+                                <td>
+                                    <input
+                                        placeholder="기업명을 입력해주세요."
+                                        {...register("companyName")}
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </HorizontalTable>
+                    <PointButton type="submit">저장</PointButton>
+                </form>
+            </Modal>
+        );
+    };
+
+    const onModifyCompanyName = async (data) => {
+        const { companyName } = data;
+
+        if (companyName.length === 0) return;
+
+        try {
+            const response = await axios.post(SERVER + `/admin/company`, {
+                id: userData.id,
+                companyName,
+            });
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onModifyCompanyName valid");
+                closeCompanyNameModal();
+                userData.companyName = companyName;
+            }
+        } catch (error) {
+            console.log("onModifyCompanyName invalid");
+            console.log(error);
+        }
+    };
+
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
     return (
@@ -918,33 +986,56 @@ function UserDetails({ data, onClose }) {
                                         </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th>차량번호</th>
-                                    <td>
-                                        {userData.vehicle.length === 0
-                                            ? ""
-                                            : userData.vehicle[0].number}
-                                        <Blank />
-                                        <PointButton
-                                            type="button"
-                                            onClick={openVehicleModal}
-                                        >
-                                            수정
-                                        </PointButton>
-                                    </td>
-                                    <th>차량종류</th>
-                                    <td>
-                                        {userData.vehicle.length === 0
-                                            ? ""
-                                            : userData.vehicle[0].type.type +
-                                              " / " +
-                                              (userData.vehicle[0].weight
-                                                  ? userData.vehicle[0].weight
-                                                        .weight
-                                                  : userData.vehicle[0].floor
-                                                        .floor)}
-                                    </td>
-                                </tr>
+                                {userData.userTypeId !== 3 ? (
+                                    <tr>
+                                        <th>차량번호</th>
+                                        <td>
+                                            {userData.vehicle.length === 0
+                                                ? ""
+                                                : userData.vehicle[0].number}
+                                            <Blank />
+                                            <PointButton
+                                                type="button"
+                                                onClick={openVehicleModal}
+                                            >
+                                                수정
+                                            </PointButton>
+                                        </td>
+                                        <th>차량종류</th>
+                                        <td>
+                                            {userData.vehicle.length === 0
+                                                ? ""
+                                                : userData.vehicle[0].type
+                                                      .type +
+                                                  " / " +
+                                                  (userData.vehicle[0].weight
+                                                      ? userData.vehicle[0]
+                                                            .weight.weight
+                                                      : userData.vehicle[0]
+                                                            .floor.floor)}
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    <tr>
+                                        <th>기업명</th>
+                                        <td>
+                                            {userData.companyName}
+                                            <Blank />
+                                            <PointButton
+                                                type="button"
+                                                onClick={openCompanyNameModal}
+                                            >
+                                                수정
+                                            </PointButton>
+                                        </td>
+                                        <th>구구팩</th>
+                                        <td>
+                                            {userData.gugupack
+                                                ? "회원"
+                                                : "비회원"}
+                                        </td>
+                                    </tr>
+                                )}
                                 <tr>
                                     <th>이름(실명)</th>
                                     <td>{userData.name}</td>
@@ -1017,7 +1108,7 @@ function UserDetails({ data, onClose }) {
                         </HorizontalTable>
                     </Wrapper>
                     <Wrapper>
-                        <Title>내가 입력한 추천인</Title>
+                        <Title>추천인</Title>
                         <div style={{ paddingTop: 10 }}>
                             {myRecommendData !== null ? (
                                 <Table
@@ -1029,7 +1120,7 @@ function UserDetails({ data, onClose }) {
                         </div>
                     </Wrapper>
                     <Wrapper>
-                        <Title>나를 입력한 회원</Title>
+                        <Title>추천 회원</Title>
                         <div style={{ paddingTop: 10 }}>
                             {recommendData !== null ? (
                                 <Table
@@ -1046,6 +1137,7 @@ function UserDetails({ data, onClose }) {
                     ) : null}
                     {showVehicleModal ? <VehicleModal /> : null}
                     {showRecommendModal ? <RecommendModal /> : null}
+                    {showCompanyNameModal ? <CompanyNameModal /> : null}
                 </Container>
             ) : null}
         </>
