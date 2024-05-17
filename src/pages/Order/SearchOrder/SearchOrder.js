@@ -441,11 +441,18 @@ function SearchOrder() {
         startDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 0, 0);
 
+        let standBy = false;
+
+        if (Number(orderStatus) === 7) {
+            standBy = true;
+        }
+
         const sendData = {
             orderId: orderId ? orderId.substring(6, orderId.length) : null,
             acceptUser: acceptUser ? acceptUser : null,
             registUser: registUser ? registUser : null,
-            orderStatus: orderStatus !== "0" ? orderStatus : null,
+            orderStatus:
+                orderStatus !== "0" && orderStatus !== "7" ? orderStatus : null,
             orderType:
                 orderType !== "0"
                     ? orderType === "1"
@@ -455,6 +462,7 @@ function SearchOrder() {
             region: region ? region : null,
             startDate: originalStartDate ? startDate : null,
             endDate: originalEndDate ? endDate : null,
+            standBy: standBy ? true : null,
         };
 
         console.log(sendData);
