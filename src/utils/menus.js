@@ -23,6 +23,7 @@ export const SUB_MENUS = {
     ],
     ORDER: [
         { name: "작업정보 검색", route: "/search" },
+        { name: "후불작업 검색", route: "/postpaid" },
         { name: "작업 등록", route: "/regist" },
     ],
     POINT: [

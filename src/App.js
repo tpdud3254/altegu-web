@@ -18,6 +18,7 @@ import ManageBanner from "./pages/Image/ManageBanner";
 import ManagePopup from "./pages/Image/ManagePopup";
 import MembershipPrice from "./pages/Price/MembershipPrice";
 import RegistOrder from "./pages/Order/RegistOrder/RegistOrder";
+import SearchPostpaidOrder from "./pages/Order/SearchPostpaidOrder/SearchPostpaidOrder";
 
 Amplify.configure(awsExports);
 
@@ -51,6 +52,10 @@ function App() {
                     />
                     <Route
                         path={`${MENUS.ORDER.route}${SUB_MENUS.ORDER[1].route}`}
+                        element={<SearchPostpaidOrder />}
+                    />
+                    <Route
+                        path={`${MENUS.ORDER.route}${SUB_MENUS.ORDER[2].route}`}
                         element={<RegistOrder />}
                     />
                     <Route
