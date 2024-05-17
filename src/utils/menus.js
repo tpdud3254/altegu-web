@@ -21,7 +21,10 @@ export const SUB_MENUS = {
         { name: "회원정보 검색", route: "/search" },
         { name: "정회원 관리", route: "/management" },
     ],
-    ORDER: [{ name: "작업정보 검색", route: "/search" }],
+    ORDER: [
+        { name: "작업정보 검색", route: "/search" },
+        { name: "작업 등록", route: "/regist" },
+    ],
     POINT: [
         { name: "출금 신청 목록", route: "/withdraw" },
         { name: "포인트 내역 조회", route: "/breakdown" },

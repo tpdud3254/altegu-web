@@ -23,4 +23,11 @@ export const GlobalStyles = createGlobalStyle`
         text-decoration: none;
         color:inherit;
     }
+
+    input::-webkit-inner-spin-button {
+        appearance: none;
+        -moz-appearance: none;
+        -webkit-appearance: none;
+    }
+
 `;

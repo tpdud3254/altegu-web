@@ -122,3 +122,18 @@ export const CheckPassword = (password) => {
         return true;
     }
 };
+
+export const CheckValidation = (data) => {
+    let result = [];
+
+    Object.keys(data).map((value) => {
+        if (typeof data[value] === "number")
+            result.push(data[value] > 0 ? true : false);
+        else result.push(data[value] && data[value].length > 0 ? true : false);
+    });
+
+    for (let i = 0; i < result.length; i++)
+        if (result[i] === false) return false;
+
+    return true;
+};

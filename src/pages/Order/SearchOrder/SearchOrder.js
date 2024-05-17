@@ -155,6 +155,8 @@ function SearchOrder() {
                 return "카드결제";
             case "keyedin":
                 return "수기결제";
+            case "admin_order":
+                return "관리자 등록 작업";
             default:
                 return "";
         }
