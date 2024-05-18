@@ -20,6 +20,7 @@ export const SUB_MENUS = {
     USER: [
         { name: "회원정보 검색", route: "/search" },
         { name: "정회원 관리", route: "/management" },
+        { name: "구구팩 신청 목록", route: "/gugupack" },
     ],
     ORDER: [
         { name: "작업정보 검색", route: "/search" },

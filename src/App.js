@@ -19,6 +19,7 @@ import ManagePopup from "./pages/Image/ManagePopup";
 import MembershipPrice from "./pages/Price/MembershipPrice";
 import RegistOrder from "./pages/Order/RegistOrder/RegistOrder";
 import SearchPostpaidOrder from "./pages/Order/SearchPostpaidOrder/SearchPostpaidOrder";
+import SubscribeGugupack from "./pages/User/SubscribeGugupack/SubscribeGugupack";
 
 Amplify.configure(awsExports);
 
@@ -45,6 +46,10 @@ function App() {
                     <Route
                         path={`${MENUS.USER.route}${SUB_MENUS.USER[1].route}`}
                         element={<ManageMembership />}
+                    />
+                    <Route
+                        path={`${MENUS.USER.route}${SUB_MENUS.USER[2].route}`}
+                        element={<SubscribeGugupack />}
                     />
                     <Route
                         path={`${MENUS.ORDER.route}${SUB_MENUS.ORDER[0].route}`}
