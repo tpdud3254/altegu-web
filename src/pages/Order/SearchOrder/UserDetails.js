@@ -16,7 +16,16 @@ import Table from "../../../components/Table/Table";
 import { LinkText } from "../../../components/Text/LinkText";
 import { HorizontalTable } from "../../../components/Table/HorizontalTable";
 import axios from "axios";
-import { SERVER, VALID } from "../../../constant";
+import {
+    POINT_BRAKEDOWN_TEXT,
+    POINT_STATUS,
+    SERVER,
+    VALID,
+} from "../../../constant";
+import { DefaultButton } from "../../../components/Button/DefaultButton";
+import { Blank } from "../../../components/Blank";
+import Modal from "../../../components/Modal";
+import { useForm } from "react-hook-form";
 
 const Container = styled.div`
     width: 100%;
@@ -44,6 +53,10 @@ function UserDetails({ data, onClose }) {
     const [userData, setUserData] = useState(null);
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
+
+    const { register, handleSubmit, setValue, watch, getValues } = useForm();
+
+    const [showPointModal, setShowPointModal] = useState(false);
 
     useEffect(() => {
         getUser(data);
@@ -136,6 +149,164 @@ function UserDetails({ data, onClose }) {
 
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
+    const openPointModal = (index) => {
+        setShowPointModal(true);
+    };
+    const closePointModal = () => {
+        setShowPointModal(false);
+        setValue("point", "");
+        setValue("pointStatus", "0");
+        setValue("pointsData", "0");
+        setValue("pointsText", "");
+    };
+
+    const PointModal = () => (
+        <Modal
+            open={openPointModal}
+            close={closePointModal}
+            header="포인트 수정"
+        >
+            <HorizontalTable>
+                <thead></thead>
+                <tbody>
+                    <tr>
+                        <th>현재 포인트</th>
+                        <td>
+                            {NumberWithComma(userData.point.curPoint) + "AP"}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>금액</th>
+                        <td>
+                            <input
+                                type="number"
+                                {...register("point", "0")}
+                            ></input>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>종류</th>
+                        <td>
+                            <select
+                                name="pointStatus"
+                                {...register("pointStatus", "0")}
+                            >
+                                {Object.keys(POINT_STATUS).map(
+                                    (value, index) => (
+                                        <option value={value} key={index}>
+                                            {value === "none"
+                                                ? "선택"
+                                                : POINT_STATUS[value]}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>내역</th>
+                        <td>
+                            <select
+                                name="pointsData"
+                                {...register("pointsData", "0")}
+                            >
+                                {Object.keys(POINT_BRAKEDOWN_TEXT).map(
+                                    (value, index) => (
+                                        <option value={value} key={index}>
+                                            {value === "0"
+                                                ? "선택"
+                                                : POINT_BRAKEDOWN_TEXT[value]}
+                                        </option>
+                                    )
+                                )}
+                            </select>
+                            <Blank />
+                            <input
+                                disabled={watch("pointsData") !== "8"}
+                                {...register("pointsText", "")}
+                            ></input>
+                        </td>
+                    </tr>
+                </tbody>
+            </HorizontalTable>
+            <button type="button" onClick={onModifyPoint}>
+                포인트 수정 및 저장
+            </button>
+        </Modal>
+    );
+
+    const onModifyPoint = async () => {
+        const { point, pointStatus, pointsData, pointsText } = getValues();
+
+        console.log("modify point : ", point);
+        console.log("modify pointStatus : ", pointStatus);
+        console.log("modify pointsData : ", pointsData);
+        console.log("modify pointsText : ", pointsText);
+
+        if (!point || point.length === 0 || Number(point) === 0) {
+            alert("금액을 입력하세요.");
+            return;
+        }
+
+        if (
+            !pointStatus ||
+            pointStatus.length === 0 ||
+            pointStatus === "none"
+        ) {
+            alert("종류를 선택하세요.");
+            return;
+        }
+
+        if (!pointsData || pointsData.length === 0 || pointsData === "0") {
+            alert("포인트 내역을 선택하세요.");
+            return;
+        }
+
+        if (pointsData === "8" && (!pointsText || pointsText.length === 0)) {
+            alert("포인트 내역을 입력하세요.");
+            return;
+        }
+
+        try {
+            const response = await axios.patch(SERVER + "/admin/points", {
+                pointId: userData.point.id,
+                curPoint: Number.parseInt(userData.point.curPoint),
+                points: Number.parseInt(point),
+                type: pointStatus,
+                content:
+                    pointsData === "8"
+                        ? pointsText
+                        : POINT_BRAKEDOWN_TEXT[pointsData],
+            });
+
+            const {
+                data: {
+                    data: { points },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            if (result === VALID) {
+                console.log("onModifyPoint valid");
+                console.log(points);
+
+                const prev1 = userData;
+                prev1.point.curPoint = points.curPoint;
+                setUserData(prev1);
+
+                closePointModal();
+                alert("포인트 변경 및 내역 추가가 완료되었습니다.");
+            } else {
+                console.log("onModifyPoint invalid");
+                alert("포인트 변경 및 내역 추가에 실패하였습니다.");
+            }
+        } catch (error) {
+            console.log("onModifyPoint error : ", error);
+            alert("포인트 변경 및 내역 추가에 실패하였습니다.");
+        }
+    };
+
     return (
         <>
             {userData ? (
@@ -187,6 +358,10 @@ function UserDetails({ data, onClose }) {
                                                   userData.point.curPoint
                                               ) + "AP"
                                             : "0AP"}
+                                        <Blank />
+                                        <DefaultButton onClick={openPointModal}>
+                                            변경
+                                        </DefaultButton>
                                     </td>
                                     <th>
                                         사업자 등록증/
@@ -299,6 +474,7 @@ function UserDetails({ data, onClose }) {
                             ) : null}
                         </div>
                     </Wrapper>
+                    {showPointModal ? <PointModal /> : null}
                 </Container>
             ) : null}
         </>
