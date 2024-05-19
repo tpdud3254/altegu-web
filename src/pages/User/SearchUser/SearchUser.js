@@ -90,6 +90,7 @@ function SearchUser() {
     const [showStartCalendar, setShowStartCalendar] = useState(false);
     const [showEndCalendar, setShowEndCalendar] = useState(false);
     const [showPointModal, setShowPointModal] = useState(false);
+    const [showGugupackModal, setShowGugupackModal] = useState(false);
     const [showLicenseModal, setShowLicenseModal] = useState(false);
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
@@ -176,7 +177,7 @@ function SearchUser() {
                 withdrawalDate: value.withdrawalDate
                     ? GetDateTime(value.withdrawalDate)
                     : "-",
-                gugupack: value.gugupack ? "회원" : "",
+                gugupack: getGugupackButton(index, value.gugupack),
             });
         });
         return result;
@@ -238,6 +239,13 @@ function SearchUser() {
             {NumberWithComma(point) + "AP"}
         </LinkText>
     );
+
+    const getGugupackButton = (index, isGugupackUser) =>
+        isGugupackUser ? (
+            <LinkText onClick={() => openGugupackModal(index)}>회원</LinkText>
+        ) : (
+            ""
+        );
 
     const openDetail = (index) => {
         setShowDetail(true);
@@ -464,6 +472,36 @@ function SearchUser() {
             </Modal>
         );
     };
+
+    const openGugupackModal = (index) => {
+        setShowGugupackModal(true);
+        setUserIndex(index);
+    };
+    const closeGugupackModal = () => {
+        setShowGugupackModal(false);
+        setUserIndex(null);
+    };
+
+    const GugupackModal = () => (
+        <Modal
+            open={openGugupackModal}
+            close={closeGugupackModal}
+            header="구구팩 해제"
+        >
+            <div>해당 회원의 구구팩을 해제하시겠습니까?</div>
+            <Blank />
+            <div>
+                {userData[userIndex].name} / {userData[userIndex].phone}
+            </div>
+            <Blank />
+            <Blank />
+            <div>
+                <DefaultButton type="button" onClick={onUnsubscribeGugupack}>
+                    해제하기
+                </DefaultButton>
+            </div>
+        </Modal>
+    );
 
     const Calendar = ({ value }) => {
         const onChange = (data) => {
@@ -820,6 +858,59 @@ function SearchUser() {
         }
     };
 
+    const onUnsubscribeGugupack = async () => {
+        try {
+            const response = await axios.post(
+                SERVER + "/users/gugupack/cancel",
+                {
+                    id: userData[userIndex].id,
+                }
+            );
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                },
+            } = response;
+
+            if (result === VALID) {
+                console.log("onUnsubscribeGugupack valid");
+                alert("구구팩 해지에 성공");
+
+                if (getValues("gugupackStatus") === "member") {
+                    const prev1 = [...tableData];
+                    prev1.splice(userIndex, 1);
+                    setTableData([...prev1]);
+
+                    const prev2 = [...userData];
+                    prev2.splice(userIndex, 1);
+                    setUserData([...prev2]);
+                } else {
+                    const prev1 = [...tableData];
+                    prev1[userIndex].gugupack = getGugupackButton(
+                        userIndex,
+                        false
+                    );
+                    setTableData([...prev1]);
+
+                    const prev2 = [...userData];
+                    prev2[userIndex].gugupack = false;
+                    setUserData([...prev2]);
+                }
+
+                closeGugupackModal();
+            } else {
+                console.log("onUnsubscribeGugupack invalid");
+                alert("해지 실패");
+            }
+        } catch (error) {
+            console.log("onUnsubscribeGugupack error : ", error);
+            alert("해지 실패");
+        } finally {
+        }
+    };
+
     const onValid = async (data) => {
         const {
             gender,
@@ -1108,6 +1199,7 @@ function SearchUser() {
                             <VehiclePermissionModal />
                         ) : null}
                         {showDeleteUserModal ? <DeleteUserModal /> : null}
+                        {showGugupackModal ? <GugupackModal /> : null}
                     </>
                 </form>
             </MainContentLayout>
