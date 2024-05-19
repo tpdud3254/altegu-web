@@ -618,6 +618,7 @@ function RegistOrder() {
             paymentDate,
             paymentType: paymentTypeText,
             price: priceText,
+            gugupackPrice: gugupackPriceText,
             registUser,
             upFloor: upFloorText,
             vehicleType: vehicleTypeText,
@@ -629,7 +630,6 @@ function RegistOrder() {
             phone,
             isDesignation,
             driverId,
-            gugupackPrice,
         } = data;
 
         const direction = Number(directionText);
@@ -639,6 +639,7 @@ function RegistOrder() {
         const orderMin = Number(orderMinText);
         const paymentType = Number(paymentTypeText);
         const price = Number(priceText);
+        const gugupackPrice = Number(gugupackPriceText);
         const upFloor = Number(upFloorText);
         const vehicleType = Number(vehicleTypeText);
         const volume = Number(volumeText);

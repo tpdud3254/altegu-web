@@ -20,6 +20,7 @@ import MembershipPrice from "./pages/Price/MembershipPrice";
 import RegistOrder from "./pages/Order/RegistOrder/RegistOrder";
 import SearchPostpaidOrder from "./pages/Order/SearchPostpaidOrder/SearchPostpaidOrder";
 import SubscribeGugupack from "./pages/User/SubscribeGugupack/SubscribeGugupack";
+import Commission from "./pages/Price/Commission";
 
 Amplify.configure(awsExports);
 
@@ -82,6 +83,10 @@ function App() {
                     <Route
                         path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[2].route}`}
                         element={<MembershipPrice />}
+                    />
+                    <Route
+                        path={`${MENUS.PRICE.route}${SUB_MENUS.PRICE[3].route}`}
+                        element={<Commission />}
                     />
                     <Route
                         path={`${MENUS.IMAGE.route}${SUB_MENUS.IMAGE[0].route}`}
