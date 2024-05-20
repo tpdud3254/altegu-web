@@ -79,7 +79,7 @@ function RegistOrder() {
 
     useEffect(() => {
         getAllPrice();
-        getGugupackPrice();
+        // getGugupackPrice();
 
         register("originalPaymentDate");
         register("originalDateTimeDate");
@@ -458,10 +458,10 @@ function RegistOrder() {
         }
     };
 
-    const getUser = async (type = null) => {
+    const getUser = async (_, value = null) => {
         let phone = "";
 
-        if (type === "driver") phone = getValues("driver");
+        if (value === "driver") phone = getValues("driver");
         else phone = getValues("registUser");
 
         if (!check(phone)) {
@@ -487,7 +487,7 @@ function RegistOrder() {
                     },
                 } = response;
 
-                if (type === "driver") {
+                if (value === "driver") {
                     if (user.userTypeId === 2) {
                         setValue("isDesignation", true);
                         setValue("driverId", user.id);
@@ -500,8 +500,8 @@ function RegistOrder() {
                     setValue("name", user.name);
                     setValue("phone", user.phone);
                     setValue("isGugupackUser", user.gugupack || false);
-                    if (user.gugupack) getGugupackPrice();
-                    else setValue("gugupackPrice");
+                    if (user.gugupack) await getGugupackPrice();
+                    else setValue("gugupackPrice", 0);
                 }
             } else {
                 const {
@@ -527,7 +527,7 @@ function RegistOrder() {
                     result,
                     data: { price },
                 } = data;
-                console.log("getGugupackPrice: ", price);
+                console.log("getGugupackPrice: ", price.gugupackPrice);
                 if (
                     getValues("vehicleType") === "1" &&
                     getValues("volume") === "2" &&
@@ -934,7 +934,9 @@ function RegistOrder() {
                                             <Blank />
                                             <button
                                                 type="button"
-                                                onClick={getUser}
+                                                onClick={(e) =>
+                                                    getUser(e, "registUser")
+                                                }
                                             >
                                                 검색
                                             </button>
@@ -1538,8 +1540,8 @@ function RegistOrder() {
                                             <Blank />
                                             <button
                                                 type="button"
-                                                onClick={() =>
-                                                    getUser("driver")
+                                                onClick={(e) =>
+                                                    getUser(e, "driver")
                                                 }
                                             >
                                                 검색
