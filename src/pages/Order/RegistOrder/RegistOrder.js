@@ -203,6 +203,13 @@ function RegistOrder() {
         loading,
     ]);
 
+    useEffect(() => {
+        setValue("isDesignation", false);
+        setValue("driver", null);
+        setValue("driverId", null);
+        setValue("driverName", null);
+    }, [watch("vehicleType")]);
+
     const getAllPrice = async () => {
         try {
             const response = await axios.get(SERVER + "/admin/price/order", {
@@ -487,13 +494,26 @@ function RegistOrder() {
                     },
                 } = response;
 
+                console.log("getUser : ", user.vehicle[0].type.id);
                 if (value === "driver") {
                     if (user.userTypeId === 2) {
-                        setValue("isDesignation", true);
-                        setValue("driverId", user.id);
-                        setValue("driverName", user.name);
+                        if (
+                            Number(getValues("vehicleType")) ===
+                            user.vehicle[0].type.id
+                        ) {
+                            setValue("isDesignation", true);
+                            setValue("driverId", user.id);
+                            setValue("driverName", user.name);
+                        } else {
+                            alert("유저를 찾지 못했습니다.");
+                            setValue("isDesignation", false);
+                            setValue("driverId", null);
+                            setValue("driverName", null);
+                        }
                     } else {
-                        alert("유저를 찾지 못했습니다.");
+                        setValue("isDesignation", false);
+                        setValue("driverId", null);
+                        setValue("driverName", null);
                     }
                 } else {
                     setValue("userId", user.id);
