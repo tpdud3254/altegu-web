@@ -93,14 +93,12 @@ function SearchPostpaidOrder() {
                 }
             );
             const {
-                data: { result },
+                data: {
+                    result,
+                    data: { orders },
+                },
             } = response;
             if (result === VALID) {
-                const {
-                    data: {
-                        data: { orders },
-                    },
-                } = response;
                 console.log("getOrders valid : ", orders);
 
                 setOrderData(orders);
@@ -139,42 +137,41 @@ function SearchPostpaidOrder() {
     };
 
     const getPointCalc = (tableIndex, orderId, isCalculated) => {
-        const calculated = async () => {
-            try {
-                const response = await axios.patch(
-                    SERVER + "/admin/order/calculate",
-                    {
-                        orderId: orderId,
-                    }
-                );
+        return isCalculated ? (
+            "O"
+        ) : (
+            <LinkText onClick={() => calculated(tableIndex, orderId)}>
+                X
+            </LinkText>
+        );
+    };
 
-                const {
-                    data: {
-                        data: { order },
-                        result,
-                        msg,
-                    },
-                } = response;
-
-                console.log(order);
-
-                if (result === VALID) {
-                    const prev = [...orderData];
-                    prev[tableIndex].isCalculated = true;
-
-                    setOrderData([...prev]);
-                    setTableData(getTableData([...prev]));
-                } else {
-                    console.log("calculated invalid");
-                    alert("포인트 분배에 실패하였습니다.");
+    const calculated = async (tableIndex, orderId) => {
+        try {
+            const response = await axios.patch(
+                SERVER + "/admin/order/calculate",
+                {
+                    orderId: orderId,
                 }
-            } catch (error) {
-                alert("포인트 분배에 실패하였습니다.");
-                console.log("calculated error : ", error);
-            }
-        };
+            );
 
-        return isCalculated ? "O" : <LinkText onClick={calculated}>X</LinkText>;
+            const {
+                data: {
+                    data: { order },
+                    result,
+                },
+            } = response;
+
+            if (result === VALID) {
+                Reload();
+            } else {
+                console.log("calculated invalid");
+                alert("포인트 분배에 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("포인트 분배에 실패하였습니다.");
+            console.log("calculated error : ", error);
+        }
     };
 
     const getName = (index, name) => (
