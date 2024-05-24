@@ -164,7 +164,7 @@ function SearchUser() {
                     value.userTypeId === 3
                         ? GetUserType(value.userTypeId) +
                           ">" +
-                          value.workCategory.name
+                          value.workCategory?.name
                         : value.membership
                         ? GetUserType(value.userTypeId) + " (정회원)"
                         : GetUserType(value.userTypeId),
