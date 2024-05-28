@@ -34,6 +34,7 @@ import DetailContentLayout from "../../../components/Layout/DetailContentLayout"
 import SubtractScreen from "./SubtractScreen";
 import Modal from "../../../components/Modal";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
+import { LinkText } from "../../../components/Text/LinkText";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -158,7 +159,7 @@ function ManageMembership() {
                 point: value.point
                     ? NumberWithComma(value.point.curPoint) + "AP"
                     : "0AP",
-                status: getStatus(value.membership, value.status),
+                status: getStatus(value.membership, value.status, value.id),
                 withdrawalMembershipDate: value.withdrawalMembershipDate
                     ? GetDateTime(value.withdrawalMembershipDate)
                     : "-",
@@ -181,10 +182,39 @@ function ManageMembership() {
         </div>
     );
 
-    const getStatus = (membership, status) => {
-        if (membership) return "정회원";
+    const getStatus = (membership, status, id) => {
+        if (membership)
+            return (
+                <LinkText onClick={() => setMembership(id)}>정회원</LinkText>
+            );
         else if (status === "정상") return "기사회원";
         else return status;
+    };
+
+    const setMembership = async (id) => {
+        try {
+            const response = await axios.patch(
+                SERVER + "/admin/users/membership/cancel",
+                {
+                    id,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                alert("정회원 수정에 성공하였습니다.");
+                getMembershipUsers();
+            } else {
+                alert("정회원 수정에 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("정회원 수정에 실패하였습니다.");
+
+            console.log("error : ", error);
+        }
     };
 
     const getMembershipUsers = async (data) => {
