@@ -65,6 +65,7 @@ function UserDetails({ data, onClose }) {
     const [showVehicleModal, setShowVehicleModal] = useState(false);
     const [showRecommendModal, setShowRecommendModal] = useState(false);
     const [showCompanyNameModal, setShowCompanyNameModal] = useState(false);
+    const [showNicknameModal, setShowNicknameeModal] = useState(false);
 
     const [processing, setProcessing] = useState(false);
 
@@ -880,6 +881,81 @@ function UserDetails({ data, onClose }) {
         }
     };
 
+    const openNicknameModal = () => {
+        setShowNicknameeModal(true);
+    };
+    const closeNicknameModal = () => {
+        setShowNicknameeModal(false);
+    };
+
+    const NicknameModal = () => {
+        return (
+            <Modal
+                open={openNicknameModal}
+                close={closeNicknameModal}
+                header="별칭 수정"
+            >
+                <form onSubmit={handleSubmit(onModifyNickname)}>
+                    <HorizontalTable>
+                        <thead></thead>
+                        <tbody>
+                            <tr>
+                                <th>현재 별칭</th>
+                                <td>
+                                    {userData.nickname
+                                        ? userData.nickname
+                                        : "없음"}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>별칭</th>
+                                <td>
+                                    <input
+                                        placeholder="별칭을 입력해주세요."
+                                        {...register("nickname")}
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </HorizontalTable>
+                    <PointButton type="submit">저장</PointButton>
+                </form>
+            </Modal>
+        );
+    };
+
+    const onModifyNickname = async (data) => {
+        const { nickname } = data;
+
+        if (nickname.length === 0) return;
+
+        try {
+            const response = await axios.post(SERVER + `/admin/nickname`, {
+                id: userData.id,
+                nickname,
+            });
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { user },
+                    },
+                } = response;
+
+                console.log("onModifyNickname valid");
+                closeNicknameModal();
+                userData.nickname = nickname;
+            }
+        } catch (error) {
+            console.log("onModifyNickname invalid");
+            console.log(error);
+        }
+    };
+
     const columns = useMemo(() => RECOMMEND_TABLE_COL, []);
 
     return (
@@ -1039,8 +1115,19 @@ function UserDetails({ data, onClose }) {
                                 <tr>
                                     <th>이름(실명)</th>
                                     <td>{userData.name}</td>
-                                    <th>생년월일</th>
-                                    <td>{userData.birth}</td>
+                                    <th>별칭</th>
+                                    <td>
+                                        {userData.nickname
+                                            ? userData.nickname
+                                            : ""}
+                                        <Blank />
+                                        <PointButton
+                                            type="button"
+                                            onClick={openNicknameModal}
+                                        >
+                                            수정
+                                        </PointButton>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>전화번호</th>
@@ -1067,16 +1154,8 @@ function UserDetails({ data, onClose }) {
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>은행/예금주</th>
-                                    <td>
-                                        {userData.point
-                                            ? userData.point.bank
-                                                ? userData.point.bank +
-                                                  " / " +
-                                                  userData.point.accountName
-                                                : ""
-                                            : ""}
-                                    </td>
+                                    <th>생년월일</th>
+                                    <td>{userData.birth}</td>
                                     <th>성별</th>
                                     <td>{userData.gender}</td>
                                 </tr>
@@ -1089,6 +1168,18 @@ function UserDetails({ data, onClose }) {
                                                 : ""
                                             : ""}
                                     </td>
+                                    <th>은행/예금주</th>
+                                    <td>
+                                        {userData.point
+                                            ? userData.point.bank
+                                                ? userData.point.bank +
+                                                  " / " +
+                                                  userData.point.accountName
+                                                : ""
+                                            : ""}
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>작업지역</th>
                                     <td>
                                         {userData.workRegion.length === 0
@@ -1103,6 +1194,8 @@ function UserDetails({ data, onClose }) {
                                                           : value.region + " / "
                                               )}
                                     </td>
+                                    <th></th>
+                                    <td></td>
                                 </tr>
                             </tbody>
                         </HorizontalTable>
@@ -1138,6 +1231,7 @@ function UserDetails({ data, onClose }) {
                     {showVehicleModal ? <VehicleModal /> : null}
                     {showRecommendModal ? <RecommendModal /> : null}
                     {showCompanyNameModal ? <CompanyNameModal /> : null}
+                    {showNicknameModal ? <NicknameModal /> : null}
                 </Container>
             ) : null}
         </>
