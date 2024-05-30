@@ -494,9 +494,15 @@ function RegistOrder() {
                     },
                 } = response;
 
-                console.log("getUser : ", user.vehicle[0].type.id);
                 if (value === "driver") {
                     if (user.userTypeId === 2) {
+                        if (!user.vehicle || user.vehicle.length === 0) {
+                            alert("유저를 찾지 못했습니다.");
+                            setValue("isDesignation", false);
+                            setValue("driverId", null);
+                            setValue("driverName", null);
+                        }
+
                         if (
                             Number(getValues("vehicleType")) ===
                             user.vehicle[0].type.id
