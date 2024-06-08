@@ -137,3 +137,13 @@ export const CheckValidation = (data) => {
 
     return true;
 };
+
+export const GetKrDateTime = (datetime) => {
+    const curr = new Date(datetime);
+
+    const kr_curr = curr.setHours(curr.getHours() + 9);
+
+    const result = new Date(kr_curr);
+
+    return result;
+};

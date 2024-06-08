@@ -11,6 +11,7 @@ import { ORDER_DIRECTION, ORDER_TYPE, SERVER, VALID } from "../../../constant";
 import {
     CheckValidation,
     GetCalendarDateText,
+    GetKrDateTime,
     Reload,
 } from "../../../utils/utils";
 import { Calendar as ReactCalendar } from "react-calendar";
@@ -656,6 +657,7 @@ function RegistOrder() {
             phone,
             isDesignation,
             driverId,
+            push,
         } = data;
 
         const direction = Number(directionText);
@@ -712,10 +714,10 @@ function RegistOrder() {
             return;
         }
 
-        const orderDatetime = new Date(originalDateTimeDate);
+        const orderDatetime = GetKrDateTime(originalDateTimeDate);
 
-        orderDatetime.setHours(orderHours);
-        orderDatetime.setMinutes(orderMin);
+        orderDatetime.setUTCHours(orderHours);
+        orderDatetime.setUTCMinutes(orderMin);
 
         const regionId = getRegion(selectAddress1.sido, selectAddress1.sigungu);
 
@@ -827,6 +829,7 @@ function RegistOrder() {
             gugupackPrice,
             method: "admin_order",
             emergency: false,
+            push,
         };
 
         console.log("sendData : ", sendData);
@@ -1609,6 +1612,24 @@ function RegistOrder() {
                                                 {...register("directPhone")}
                                             />
                                             <Blank />
+                                        </ItemContent>
+                                    </Item>
+                                    <Item>
+                                        <ItemTitle>푸시 알림</ItemTitle>
+                                        <ItemContent>
+                                            <input
+                                                type="checkbox"
+                                                defaultChecked={true}
+                                                {...register("push", {
+                                                    value: true,
+                                                })}
+                                            />
+                                            <Blank />
+                                            <div style={{ color: "grey" }}>
+                                                선택 해제 시 기사 지정 오더가
+                                                아닌 경우 푸시 알림이 가지
+                                                않습니다 (테스트용)
+                                            </div>
                                         </ItemContent>
                                     </Item>
                                 </Container>
