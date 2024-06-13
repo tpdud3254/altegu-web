@@ -92,8 +92,24 @@ function MainLayout({ children, path }) {
     const [loading, setLoading] = useState(false);
     const [curMenu, setCurMenu] = useState(null);
     const [curSubMenuIndex, setCurSubMenuIndex] = useState(null);
+
+    //TODO: admin 계정일 경우 전부다 보이게 설정
+    const menuPermissions = ["user", "order", "price", "manage"]; //TEST: 테스트 코드
+    const submenuPermissions = [
+        "user_search",
+        "order_search",
+        "price_order",
+        "manage_manager",
+    ]; //TEST: 테스트 코드
+
     useEffect(() => {
         console.log("current path : ", path);
+
+        if (path === "/") {
+            setCurMenu("USER");
+            setCurSubMenuIndex(0);
+            return;
+        }
 
         const arr = path.split("/");
 
@@ -109,6 +125,12 @@ function MainLayout({ children, path }) {
         }
     }, [curMenu, curSubMenuIndex]);
 
+    const checkMenuPermission = (curMenu) =>
+        menuPermissions.find((menu) => menu === curMenu);
+
+    const checkSubmenuPermissions = (curSubmenu) =>
+        submenuPermissions.find((submenu) => submenu === curSubmenu);
+
     return (
         <>
             {loading ? (
@@ -121,51 +143,74 @@ function MainLayout({ children, path }) {
                         <MainNavBar>
                             <MainTitle>ATG 관리자 시스템</MainTitle>
                             <MainNavs>
-                                {Object.keys(MENUS).map((value, index) => (
-                                    <Link
-                                        to={
-                                            MENUS[value].route +
-                                            SUB_MENUS[value][0].route
-                                        }
-                                        key={index}
-                                    >
-                                        <MainNav
-                                            current={
-                                                MENUS[value].route ===
-                                                MENUS[curMenu].route
+                                {Object.keys(MENUS).map((menu, index) => {
+                                    if (!checkMenuPermission(MENUS[menu].id))
+                                        return;
+
+                                    return (
+                                        <Link
+                                            to={
+                                                MENUS[menu].route +
+                                                SUB_MENUS[menu][0].route
                                             }
+                                            key={index}
                                         >
-                                            {MENUS[value].name}
-                                        </MainNav>
-                                    </Link>
-                                ))}
+                                            <MainNav
+                                                current={
+                                                    MENUS[menu].route ===
+                                                    MENUS[curMenu].route
+                                                }
+                                            >
+                                                {MENUS[menu].name}
+                                            </MainNav>
+                                        </Link>
+                                    );
+                                })}
                             </MainNavs>
                         </MainNavBar>
                         <Bottom>
                             <SubNavSideBar>
                                 <SubTitle>{MENUS[curMenu].name}</SubTitle>
                                 <SubNavs>
-                                    {SUB_MENUS[curMenu].map((menu, index) => (
-                                        <Link
-                                            key={index}
-                                            to={
-                                                MENUS[curMenu].route +
-                                                SUB_MENUS[curMenu][index].route
-                                            }
-                                        >
-                                            <SubNav
-                                                current={
-                                                    curSubMenuIndex === index
-                                                }
-                                            >
-                                                <span>{menu.name}</span>
-                                                <FontAwesomeIcon
-                                                    icon={faChevronRight}
-                                                    color="grey"
-                                                />
-                                            </SubNav>
-                                        </Link>
-                                    ))}
+                                    {SUB_MENUS[curMenu].map(
+                                        (submenu, index) => {
+                                            if (
+                                                !checkSubmenuPermissions(
+                                                    submenu.id
+                                                )
+                                            )
+                                                return;
+
+                                            return (
+                                                <Link
+                                                    key={index}
+                                                    to={
+                                                        MENUS[curMenu].route +
+                                                        SUB_MENUS[curMenu][
+                                                            index
+                                                        ].route
+                                                    }
+                                                >
+                                                    <SubNav
+                                                        current={
+                                                            curSubMenuIndex ===
+                                                            index
+                                                        }
+                                                    >
+                                                        <span>
+                                                            {submenu.name}
+                                                        </span>
+                                                        <FontAwesomeIcon
+                                                            icon={
+                                                                faChevronRight
+                                                            }
+                                                            color="grey"
+                                                        />
+                                                    </SubNav>
+                                                </Link>
+                                            );
+                                        }
+                                    )}
                                 </SubNavs>
                             </SubNavSideBar>
                             <Content>{children}</Content>
