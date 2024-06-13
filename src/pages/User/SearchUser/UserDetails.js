@@ -963,8 +963,8 @@ function UserDetails({ data, onClose }) {
             {userData ? (
                 <Container>
                     <div style={{ width: "100%" }}>
-                        <LinkText onClick={Reset}>회원정보 검색</LinkText> {">"}{" "}
-                        회원상세정보
+                        <LinkText onClick={onClose}>회원정보 검색</LinkText>{" "}
+                        {">"} 회원상세정보
                     </div>
                     <Wrapper>
                         <Title>기본정보</Title>

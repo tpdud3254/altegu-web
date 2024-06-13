@@ -1167,7 +1167,7 @@ function SearchUser() {
                                     명
                                 </div>
                                 <div>
-                                    <button
+                                    {/* <button
                                         type="button"
                                         onClick={() => {}}
                                         // onClick={onSubtractPoint}
@@ -1175,7 +1175,7 @@ function SearchUser() {
                                     >
                                         포인트 차감
                                     </button>
-                                    <Blank />
+                                    <Blank /> */}
                                     <button
                                         type="button"
                                         onClick={openDeleteUser}

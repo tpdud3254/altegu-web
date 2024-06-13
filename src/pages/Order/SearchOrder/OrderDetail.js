@@ -534,8 +534,10 @@ function OrderDetail({ onClose, data }) {
             {order ? (
                 <Container>
                     <div style={{ width: "100%" }}>
-                        <LinkText onClick={Reset}>작업정보 검색</LinkText> {">"}{" "}
-                        작업상세정보
+                        <LinkText onClick={() => onClose()}>
+                            작업정보 검색
+                        </LinkText>{" "}
+                        {">"} 작업상세정보
                     </div>
                     <form onSubmit={handleSubmit(onValid)}>
                         <Wrapper>
