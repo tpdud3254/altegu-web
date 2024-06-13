@@ -2,9 +2,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MENUS, SUB_MENUS } from "../../utils/menus";
 import { Link } from "react-router-dom";
+import LoginContext from "../../contexts/LoginContext";
 
 const Container = styled.div`
     margin: 20px;
@@ -89,6 +90,7 @@ const Content = styled.div`
     padding: 15px 0px 0px 15px;
 `;
 function MainLayout({ children, path }) {
+    const { setIsLoggedIn, setUserInfo, userInfo } = useContext(LoginContext);
     const [loading, setLoading] = useState(false);
     const [curMenu, setCurMenu] = useState(null);
     const [curSubMenuIndex, setCurSubMenuIndex] = useState(null);
@@ -132,13 +134,19 @@ function MainLayout({ children, path }) {
     const checkSubmenuPermissions = (curSubmenu) =>
         submenuPermissions.find((submenu) => submenu === curSubmenu);
 
+    const logout = () => {
+        setIsLoggedIn(false);
+        setUserInfo(null);
+        localStorage.removeItem("TOKEN");
+    };
+
     return (
         <>
             {loading ? (
                 <Container>
                     <Header>
-                        <Greeting>안녕하세요. 운영관리자님.</Greeting>
-                        {/* <LogoutButton>로그아웃</LogoutButton> */}
+                        <Greeting>안녕하세요. {userInfo.userId}님.</Greeting>
+                        <LogoutButton onClick={logout}>로그아웃</LogoutButton>
                     </Header>
                     <Wrapper>
                         <MainNavBar>
