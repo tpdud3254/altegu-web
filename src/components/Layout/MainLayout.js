@@ -92,6 +92,7 @@ function MainLayout({ children, path }) {
     const [loading, setLoading] = useState(false);
     const [curMenu, setCurMenu] = useState(null);
     const [curSubMenuIndex, setCurSubMenuIndex] = useState(null);
+    const [userId, setUserId] = useState(1); //TEST: 테스트 코드
 
     //TODO: admin 계정일 경우 전부다 보이게 설정
     const menuPermissions = ["user", "order", "price", "manage"]; //TEST: 테스트 코드
@@ -144,8 +145,11 @@ function MainLayout({ children, path }) {
                             <MainTitle>ATG 관리자 시스템</MainTitle>
                             <MainNavs>
                                 {Object.keys(MENUS).map((menu, index) => {
-                                    if (!checkMenuPermission(MENUS[menu].id))
-                                        return;
+                                    if (userId !== 1)
+                                        if (
+                                            !checkMenuPermission(MENUS[menu].id)
+                                        )
+                                            return;
 
                                     return (
                                         <Link
@@ -174,12 +178,13 @@ function MainLayout({ children, path }) {
                                 <SubNavs>
                                     {SUB_MENUS[curMenu].map(
                                         (submenu, index) => {
-                                            if (
-                                                !checkSubmenuPermissions(
-                                                    submenu.id
+                                            if (userId !== 1)
+                                                if (
+                                                    !checkSubmenuPermissions(
+                                                        submenu.id
+                                                    )
                                                 )
-                                            )
-                                                return;
+                                                    return;
 
                                             return (
                                                 <Link

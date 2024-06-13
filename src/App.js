@@ -11,6 +11,7 @@ Amplify.configure(awsExports);
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(true);
+    const [userId, setUserId] = useState(1); //TEST: 테스트 코드
 
     if (!isLoggedIn) return <div>login page</div>;
 
@@ -36,10 +37,13 @@ function App() {
                 <Routes>
                     <Route path="/" element={SUB_MENUS.USER[0].element} />
                     {Object.keys(MENUS).map((menu) => {
-                        if (!checkMenuPermission(MENUS[menu].id)) return;
+                        if (userId !== 1)
+                            if (!checkMenuPermission(MENUS[menu].id)) return;
 
                         return SUB_MENUS[menu].map((submenu) => {
-                            if (!checkSubmenuPermissions(submenu.id)) return;
+                            if (userId !== 1)
+                                if (!checkSubmenuPermissions(submenu.id))
+                                    return;
 
                             return (
                                 <Route
