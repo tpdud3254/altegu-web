@@ -99,12 +99,14 @@ function SignIn() {
     };
 
     const onValid = async (data) => {
+        console.log("data : ", data);
         let result = true;
         Object.keys(data).map((value) => {
             if (!data[value] || data[value].length === 0) {
                 result = false;
             }
         });
+
         if (!result) {
             alert("누락된 값이 있습니다.");
             return;
@@ -115,15 +117,62 @@ function SignIn() {
             return;
         }
 
-        if (data.password !== data.verifiedPassword) {
+        const {
+            id,
+            password,
+            verifiedPassword,
+            name,
+            idNumber1,
+            idNumber2,
+            bank,
+            bankAccountName,
+            bankAccountNumber,
+            telecom,
+            position,
+        } = data;
+
+        if (password !== verifiedPassword) {
             alert("비밀번호가 일치 하지 않습니다.");
             return;
         }
 
+        if (idNumber1.length !== 6 || idNumber2.length !== 7) {
+            alert("유효하지 않은 주민번호입니다.");
+            return;
+        }
+
+        const bankId = Number(bank);
+        const telecomId = Number(telecom);
+        const positionId = Number(position);
+
+        if (!bankId || bankId === 0) {
+            alert("은행을 선택해주세요.");
+            return;
+        }
+
+        if (!telecomId || telecomId === 0) {
+            alert("통신사를 선택해주세요.");
+            return;
+        }
+
+        if (!positionId || positionId === 0) {
+            alert("직책을 선택해주세요.");
+            return;
+        }
+
         console.log(data);
+
         try {
             const response = await axios.post(SERVER + `/admin/create`, {
-                ...data,
+                userId: id,
+                password,
+                name,
+                idNumber: idNumber1 + "-" + idNumber2,
+                bank,
+                bankAccountName,
+                bankAccountNumber,
+                telecomId,
+                positionId,
             });
 
             const {
@@ -131,13 +180,10 @@ function SignIn() {
             } = response;
 
             if (result === VALID) {
-                const {
-                    data: {
-                        data: { user },
-                    },
-                } = response;
-
-                console.log("admin create account valid : ", user);
+                console.log("admin create account valid");
+                alert(
+                    "회원가입에 성공하였습니다.\n관리자의 승인을 대기해주세요."
+                );
                 navigate("/");
             }
         } catch (error) {
@@ -160,7 +206,10 @@ function SignIn() {
                             <tr>
                                 <th>아이디 (연락처)</th>
                                 <td>
-                                    <input {...register("id")} />
+                                    <input
+                                        {...register("id")}
+                                        onChange={() => setIsCheckedId(false)}
+                                    />
                                     <Blank />
                                     <DefaultButton
                                         type="button"
@@ -215,7 +264,7 @@ function SignIn() {
                             <tr>
                                 <th>예금주</th>
                                 <td>
-                                    <input {...register("idNumber")} />
+                                    <input {...register("bankAccountName")} />
                                 </td>
                             </tr>
                             <tr>

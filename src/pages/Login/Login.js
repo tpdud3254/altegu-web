@@ -54,7 +54,8 @@ function Login() {
     const { setIsLoggedIn, setUserInfo } = useContext(LoginContext);
     const navigate = useNavigate();
 
-    const login = async () => {
+    const login = async (e) => {
+        e.preventDefault();
         console.log("id : ", id);
         console.log("password : ", password);
         if (id.length === 0 || password.length === 0) {
@@ -68,22 +69,30 @@ function Login() {
             });
 
             const {
-                data: { result },
+                data: {
+                    result,
+                    data: { status },
+                },
             } = response;
 
             console.log(response);
             if (result === VALID) {
+                if (!status) {
+                    alert(
+                        "확인이 되지 않은 아이디입니다.\n관리자에게 문의하세요."
+                    );
+                    return;
+                }
                 const {
                     data: {
                         data: { user, token },
                     },
                 } = response;
 
-                console.log("admin create account valid : ", user);
+                console.log("admin login valid : ", user);
                 setIsLoggedIn(true);
                 setUserInfo(user);
-                localStorage.setItem("TOKEN", user.token);
-                navigate(`${MENUS.USER.route}${SUB_MENUS.USER[0].route}`);
+                localStorage.setItem("TOKEN", token);
             } else {
                 alert(response.data.msg);
             }
@@ -125,7 +134,7 @@ function Login() {
                         <Blank />
                         <Blank />
                         <Blank />
-                        <PointButton type="button" onClick={login}>
+                        <PointButton type="submit" onClick={login}>
                             로그인
                         </PointButton>
                     </Buttons>
