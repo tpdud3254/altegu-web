@@ -90,20 +90,11 @@ const Content = styled.div`
     padding: 15px 0px 0px 15px;
 `;
 function MainLayout({ children, path }) {
-    const { setIsLoggedIn, setUserInfo, userInfo } = useContext(LoginContext);
+    const { setIsLoggedIn, setAdminInfo, adminInfo, permission } =
+        useContext(LoginContext);
     const [loading, setLoading] = useState(false);
     const [curMenu, setCurMenu] = useState(null);
     const [curSubMenuIndex, setCurSubMenuIndex] = useState(null);
-    const [userId, setUserId] = useState(1); //TEST: 테스트 코드
-
-    //TODO: admin 계정일 경우 전부다 보이게 설정
-    const menuPermissions = ["user", "order", "price", "manage"]; //TEST: 테스트 코드
-    const submenuPermissions = [
-        "user_search",
-        "order_search",
-        "price_order",
-        "manage_manager",
-    ]; //TEST: 테스트 코드
 
     useEffect(() => {
         console.log("current path : ", path);
@@ -129,14 +120,16 @@ function MainLayout({ children, path }) {
     }, [curMenu, curSubMenuIndex]);
 
     const checkMenuPermission = (curMenu) =>
-        menuPermissions.find((menu) => menu === curMenu);
+        permission?.menuPermissions?.find((menu) => menu === curMenu);
 
     const checkSubmenuPermissions = (curSubmenu) =>
-        submenuPermissions.find((submenu) => submenu === curSubmenu);
+        permission?.submenuPermissions?.find(
+            (submenu) => submenu === curSubmenu
+        );
 
     const logout = () => {
         setIsLoggedIn(false);
-        setUserInfo(null);
+        setAdminInfo(null);
         localStorage.removeItem("TOKEN");
     };
 
@@ -145,7 +138,7 @@ function MainLayout({ children, path }) {
             {loading ? (
                 <Container>
                     <Header>
-                        <Greeting>안녕하세요. {userInfo.userId}님.</Greeting>
+                        <Greeting>안녕하세요. {adminInfo.name}님.</Greeting>
                         <LogoutButton onClick={logout}>로그아웃</LogoutButton>
                     </Header>
                     <Wrapper>
@@ -153,11 +146,8 @@ function MainLayout({ children, path }) {
                             <MainTitle>ATG 관리자 시스템</MainTitle>
                             <MainNavs>
                                 {Object.keys(MENUS).map((menu, index) => {
-                                    if (userId !== 1)
-                                        if (
-                                            !checkMenuPermission(MENUS[menu].id)
-                                        )
-                                            return;
+                                    if (!checkMenuPermission(MENUS[menu].id))
+                                        return;
 
                                     return (
                                         <Link
@@ -186,13 +176,12 @@ function MainLayout({ children, path }) {
                                 <SubNavs>
                                     {SUB_MENUS[curMenu].map(
                                         (submenu, index) => {
-                                            if (userId !== 1)
-                                                if (
-                                                    !checkSubmenuPermissions(
-                                                        submenu.id
-                                                    )
+                                            if (
+                                                !checkSubmenuPermissions(
+                                                    submenu.id
                                                 )
-                                                    return;
+                                            )
+                                                return;
 
                                             return (
                                                 <Link

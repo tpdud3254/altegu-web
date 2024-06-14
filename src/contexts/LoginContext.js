@@ -1,56 +1,98 @@
 import React, { createContext, useEffect, useState } from "react";
 import { MENUS, SUB_MENUS } from "../utils/menus";
+import axios from "axios";
+import { SERVER, VALID } from "../constant";
 
 export const LoginContext = createContext({
     isLoggedIn: false,
     setIsLoggedIn: () => {},
-    userInfo: null,
-    setUserInfo: () => {},
-    // permission: {},
+    adminInfo: null,
+    setAdminInfo: () => {},
+    permission: {},
 });
 
 const LoginProvider = ({ children }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userInfo, setUserInfo] = useState(false);
-    // const [permission, setPermission] = useState({});
+    const [adminInfo, setAdminInfo] = useState(false);
+    const [permission, setPermission] = useState({});
 
     useEffect(() => {
-        if (localStorage.getItem("TOKEN")) setIsLoggedIn(true);
+        const getAdminInfo = async () => {
+            const token = localStorage.getItem("TOKEN");
+
+            if (token && token.length > 0) {
+                try {
+                    const response = await axios.post(SERVER + "/admin/token", {
+                        token,
+                    });
+
+                    console.log(response);
+
+                    const {
+                        data: {
+                            result,
+                            data: { admin },
+                        },
+                    } = response;
+
+                    if (result === VALID) {
+                        setAdminInfo(admin);
+                        setIsLoggedIn(true);
+                    } else {
+                        setIsLoggedIn(false);
+                        setAdminInfo(null);
+                        setPermission({});
+                        localStorage.removeItem("TOKEN");
+                    }
+                } catch (error) {}
+            }
+        };
+
+        getAdminInfo();
     }, []);
 
-    // useEffect(() => {
-    //     if (userInfo.id === 1) {
-    //         const adminPermission = {
-    //             menuPermissions: [],
-    //             submenuPermissions: [],
-    //             funtionPermissions: [],
-    //         };
+    useEffect(() => {
+        if (adminInfo) {
+            savePermission(adminInfo);
+        } else {
+            setPermission({});
+        }
+    }, [adminInfo]);
 
-    //         Object.keys(MENUS).map((menu) => {
-    //             adminPermission.menuPermissions.push(MENUS[menu].id);
-    //             SUB_MENUS[menu].map((submenu) => {
-    //                 adminPermission.submenuPermissions.push(submenu.id);
-    //             });
-    //         });
+    const savePermission = (admin) => {
+        if (admin.id === 1) {
+            const adminPermission = {
+                menuPermissions: [],
+                submenuPermissions: [],
+                funtionPermissions: [],
+            };
 
-    //         setPermission(adminPermission);
-    //     } else {
-    //         if (userInfo?.permission || userInfo?.permission?.length > 0)
-    //             setPermission(JSON.parse(userInfo.permission));
-    //         else
-    //             setPermission({
-    //                 menuPermissions: [],
-    //                 submenuPermissions: [],
-    //                 funtionPermissions: [],
-    //             });
-    //     }
-    // }, []);
+            Object.keys(MENUS).map((menu) => {
+                adminPermission.menuPermissions.push(MENUS[menu].id);
+                SUB_MENUS[menu].map((submenu) => {
+                    adminPermission.submenuPermissions.push(submenu.id);
+                });
+            });
+
+            setPermission(adminPermission);
+        } else {
+            if (admin?.permission || admin?.permission?.length > 0)
+                setPermission(JSON.parse(admin.permission));
+            else
+                setPermission({
+                    menuPermissions: [],
+                    submenuPermissions: [],
+                    funtionPermissions: [],
+                });
+        }
+    };
 
     const value = {
         isLoggedIn,
         setIsLoggedIn,
-        userInfo,
-        setUserInfo,
+        adminInfo,
+        setAdminInfo,
+        permission,
     };
 
     return (

@@ -13,45 +13,37 @@ import SignIn from "./pages/Login/SignIn";
 Amplify.configure(awsExports);
 
 function App() {
-    const { isLoggedIn } = useContext(LoginContext);
-    const [userId, setUserId] = useState(1); //TEST: 테스트 코드
-
-    //TODO: admin 계정일 경우 전부다 보이게 설정
-    const menuPermissions = ["user", "order", "price", "manage"]; //TEST: 테스트 코드
-    const submenuPermissions = [
-        "user_search",
-        "order_search",
-        "price_order",
-        "manage_manager",
-    ]; //TEST: 테스트 코드
+    const token = localStorage.getItem("TOKEN");
+    const { isLoggedIn, permission } = useContext(LoginContext);
 
     const checkMenuPermission = (curMenu) =>
-        menuPermissions.find((menu) => menu === curMenu);
+        permission?.menuPermissions?.find((menu) => menu === curMenu);
 
     const checkSubmenuPermissions = (curSubmenu) =>
-        submenuPermissions.find((submenu) => submenu === curSubmenu);
+        permission?.submenuPermissions?.find(
+            (submenu) => submenu === curSubmenu
+        );
 
     return (
         <div>
             <HelmetProvider>
                 <GlobalStyles />
                 {!isLoggedIn ? (
-                    <Routes>
-                        <Route path="*" element={<Login />} />
-                        <Route path="/signin" element={<SignIn />} />
-                    </Routes>
+                    token ? null : (
+                        <Routes>
+                            <Route path="*" element={<Login />} />
+                            <Route path="/signin" element={<SignIn />} />
+                        </Routes>
+                    )
                 ) : (
                     <Routes>
                         <Route path="/" element={SUB_MENUS.USER[0].element} />
                         {Object.keys(MENUS).map((menu) => {
-                            if (userId !== 1)
-                                if (!checkMenuPermission(MENUS[menu].id))
-                                    return;
+                            if (!checkMenuPermission(MENUS[menu].id)) return;
 
                             return SUB_MENUS[menu].map((submenu) => {
-                                if (userId !== 1)
-                                    if (!checkSubmenuPermissions(submenu.id))
-                                        return;
+                                if (!checkSubmenuPermissions(submenu.id))
+                                    return;
 
                                 return (
                                     <Route
