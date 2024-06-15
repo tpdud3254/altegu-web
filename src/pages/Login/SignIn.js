@@ -269,7 +269,7 @@ function SignIn() {
                                 <td>
                                     <select name="bank" {...register("bank")}>
                                         {BANK_LIST.map((bank, index) => (
-                                            <option value={index}>
+                                            <option value={index} key={index}>
                                                 {bank}
                                             </option>
                                         ))}
@@ -291,7 +291,7 @@ function SignIn() {
                                         {...register("telecom")}
                                     >
                                         {TELECOM.map((telecom, index) => (
-                                            <option value={index}>
+                                            <option value={index} key={index}>
                                                 {telecom}
                                             </option>
                                         ))}
@@ -307,7 +307,10 @@ function SignIn() {
                                     >
                                         {ADMIN_POSITION.map(
                                             (position, index) => (
-                                                <option value={index}>
+                                                <option
+                                                    value={index}
+                                                    key={index}
+                                                >
                                                     {position}
                                                 </option>
                                             )
