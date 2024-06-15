@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import PageTitle from "../../components/PageTitle";
-import React, { useContext, useState } from "react";
-import LoginContext from "../../contexts/LoginContext";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { DefaultButton } from "../../components/Button/DefaultButton";
 import { PointButton } from "../../components/Button/PointButton";
@@ -55,9 +54,7 @@ const Buttons = styled.div`
 
 function SignIn() {
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
-
     const [isCheckedId, setIsCheckedId] = useState(false);
-    const { setIsLoggedIn } = useContext(LoginContext);
     const navigate = useNavigate();
 
     const checkId = async () => {
@@ -168,7 +165,7 @@ function SignIn() {
                 password,
                 name,
                 idNumber: idNumber1 + "-" + idNumber2,
-                bank,
+                bank: BANK_LIST[bankId],
                 bankAccountName,
                 bankAccountNumber,
                 telecomId,
