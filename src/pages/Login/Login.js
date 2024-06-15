@@ -90,6 +90,7 @@ function Login() {
                 setIsLoggedIn(true);
                 setAdminInfo(user);
                 localStorage.setItem("TOKEN", token);
+                navigate("/user/search");
             } else {
                 alert(response.data.msg);
             }
