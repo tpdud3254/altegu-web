@@ -1,3 +1,4 @@
+import ManageAdmin from "../pages/Admin/ManageAdmin/ManageAdmin";
 import ManageBanner from "../pages/Image/ManageBanner";
 import ManagePopup from "../pages/Image/ManagePopup";
 import RegistOrder from "../pages/Order/RegistOrder/RegistOrder";
@@ -122,7 +123,7 @@ export const SUB_MENUS = {
             id: "manage_manager",
             name: " 관리자 관리",
             route: "/manager",
-            element: <div>관리자 관리</div>,
+            element: <ManageAdmin />,
         },
     ],
 };
