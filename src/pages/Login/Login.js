@@ -51,13 +51,11 @@ const Buttons = styled.div`
 function Login() {
     const [id, setId] = useState("");
     const [password, setPassword] = useState("");
-    const { setIsLoggedIn, setUserInfo } = useContext(LoginContext);
+    const { setIsLoggedIn, setAdminInfo } = useContext(LoginContext);
     const navigate = useNavigate();
 
     const login = async (e) => {
         e.preventDefault();
-        console.log("id : ", id);
-        console.log("password : ", password);
         if (id.length === 0 || password.length === 0) {
             alert("값을 입력해주세요.");
             return;
@@ -75,7 +73,6 @@ function Login() {
                 },
             } = response;
 
-            console.log(response);
             if (result === VALID) {
                 if (!status) {
                     alert(
@@ -89,9 +86,9 @@ function Login() {
                     },
                 } = response;
 
-                console.log("admin login valid : ", user);
+                // console.log("admin login valid : ", user);
                 setIsLoggedIn(true);
-                setUserInfo(user);
+                setAdminInfo(user);
                 localStorage.setItem("TOKEN", token);
             } else {
                 alert(response.data.msg);
