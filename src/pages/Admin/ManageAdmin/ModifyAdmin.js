@@ -201,7 +201,7 @@ function ModifyAdmin({ onClose, data }) {
         const { permission } = data;
 
         const sendData = {
-            funtionPermissions: [],
+            functionPermissions: [],
             menuPermissions: [],
             submenuPermissions: [],
         };
@@ -227,7 +227,7 @@ function ModifyAdmin({ onClose, data }) {
             if (functionPermissions) {
                 Object.keys(functionPermissions).map((fn) => {
                     if (functionPermissions[fn])
-                        sendData.funtionPermissions.push(fn);
+                        sendData.functionPermissions.push(fn);
                 });
             }
         });
@@ -265,7 +265,7 @@ function ModifyAdmin({ onClose, data }) {
 
     const getFunctionPermission = (menuId, fnId) => {
         return permission?.menuPermissions?.find((id) => id === menuId) &&
-            permission?.funtionPermissions?.find((id) => id === fnId)
+            permission?.functionPermissions?.find((id) => id === fnId)
             ? true
             : false;
     };

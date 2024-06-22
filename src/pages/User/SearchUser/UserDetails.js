@@ -22,6 +22,8 @@ import axios from "axios";
 import { SERVER, VALID } from "../../../constant";
 import Modal from "../../../components/Modal";
 import { useForm } from "react-hook-form";
+import { useContext } from "react";
+import LoginContext from "../../../contexts/LoginContext";
 
 const Container = styled.div`
     width: 100%;
@@ -46,6 +48,7 @@ const Buttons = styled.div`
 `;
 
 function UserDetails({ data, onClose }) {
+    const { permission } = useContext(LoginContext);
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
     const [userData, setUserData] = useState(null);
@@ -1143,11 +1146,25 @@ function UserDetails({ data, onClose }) {
                                             onChange={(e) =>
                                                 setRecommendUser(e.target.value)
                                             }
+                                            disabled={
+                                                permission.functionPermissions.find(
+                                                    (fnId) =>
+                                                        fnId ===
+                                                        "modify_recommend"
+                                                ) === undefined
+                                            }
                                         />
                                         <Blank />
                                         <PointButton
                                             type="button"
                                             onClick={openRecommendModal}
+                                            disabled={
+                                                permission.functionPermissions.find(
+                                                    (fnId) =>
+                                                        fnId ===
+                                                        "modify_recommend"
+                                                ) === undefined
+                                            }
                                         >
                                             저장
                                         </PointButton>

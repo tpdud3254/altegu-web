@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation } from "react-router-dom";
 import styled from "styled-components";
@@ -18,6 +18,7 @@ import { Calendar as ReactCalendar } from "react-calendar";
 import "../../../components/Calendar/calendarStyle.css";
 import moment from "moment";
 import { useDaumPostcodePopup } from "react-daum-postcode";
+import LoginContext from "../../../contexts/LoginContext";
 
 const Container = styled.div`
     width: 100%;
@@ -52,6 +53,7 @@ const VOLUME = ["물량", "시간"];
 
 function RegistOrder() {
     const location = useLocation();
+    const { permission } = useContext(LoginContext);
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
     const openDaumPostcodePopup = useDaumPostcodePopup();
@@ -1586,7 +1588,16 @@ function RegistOrder() {
                                     <Item>
                                         <ItemTitle>작업 비용</ItemTitle>
                                         <ItemContent>
-                                            <input {...register("price")} />
+                                            <input
+                                                {...register("price")}
+                                                disabled={
+                                                    permission.functionPermissions.find(
+                                                        (fnId) =>
+                                                            fnId ===
+                                                            "modify_price"
+                                                    ) === undefined
+                                                }
+                                            />
                                             <Blank />P
                                             <Blank />
                                             <Blank />
@@ -1623,6 +1634,13 @@ function RegistOrder() {
                                                 {...register("push", {
                                                     value: true,
                                                 })}
+                                                disabled={
+                                                    permission.functionPermissions.find(
+                                                        (fnId) =>
+                                                            fnId ===
+                                                            "modify_push"
+                                                    ) === undefined
+                                                }
                                             />
                                             <Blank />
                                             <div style={{ color: "grey" }}>

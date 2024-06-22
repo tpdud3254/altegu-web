@@ -26,6 +26,8 @@ import { DefaultButton } from "../../../components/Button/DefaultButton";
 import { Blank } from "../../../components/Blank";
 import Modal from "../../../components/Modal";
 import { useForm } from "react-hook-form";
+import LoginContext from "../../../contexts/LoginContext";
+import { useContext } from "react";
 
 const Container = styled.div`
     width: 100%;
@@ -50,6 +52,8 @@ const Buttons = styled.div`
 `;
 
 function UserDetails({ data, onClose }) {
+    const { permission } = useContext(LoginContext);
+
     const [userData, setUserData] = useState(null);
     const [myRecommendData, setMyRecommendData] = useState(null);
     const [recommendData, setRecommendData] = useState(null);
@@ -359,9 +363,15 @@ function UserDetails({ data, onClose }) {
                                               ) + "AP"
                                             : "0AP"}
                                         <Blank />
-                                        <DefaultButton onClick={openPointModal}>
-                                            변경
-                                        </DefaultButton>
+                                        {permission.functionPermissions.find(
+                                            (fnId) => fnId === "modify_point"
+                                        ) === undefined ? null : (
+                                            <DefaultButton
+                                                onClick={openPointModal}
+                                            >
+                                                변경
+                                            </DefaultButton>
+                                        )}
                                     </td>
                                     <th>
                                         사업자 등록증/

@@ -64,7 +64,7 @@ const LoginProvider = ({ children }) => {
             const adminPermission = {
                 menuPermissions: [],
                 submenuPermissions: [],
-                funtionPermissions: [],
+                functionPermissions: [],
             };
 
             Object.keys(MENUS).map((menu) => {
@@ -73,7 +73,7 @@ const LoginProvider = ({ children }) => {
                     adminPermission.submenuPermissions.push(submenu.id);
                     if (submenu.func && submenu.func.length > 0) {
                         submenu.func.map((func) => {
-                            adminPermission.funtionPermissions.push(func.id);
+                            adminPermission.functionPermissions.push(func.id);
                         });
                     }
                 });
@@ -87,7 +87,7 @@ const LoginProvider = ({ children }) => {
                 setPermission({
                     menuPermissions: [],
                     submenuPermissions: [],
-                    funtionPermissions: [],
+                    functionPermissions: [],
                 });
         }
     };

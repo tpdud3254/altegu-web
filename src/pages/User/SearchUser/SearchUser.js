@@ -48,6 +48,8 @@ import { DefaultButton } from "../../../components/Button/DefaultButton";
 import { PointButton } from "../../../components/Button/PointButton";
 import UserDetails from "./UserDetails";
 import "../../../components/Calendar/calendarStyle.css";
+import { useContext } from "react";
+import LoginContext from "../../../contexts/LoginContext";
 
 const SearchContainer = styled.div`
     width: 100%;
@@ -84,6 +86,7 @@ function SearchUser() {
     const location = useLocation();
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
+    const { permission } = useContext(LoginContext);
     const [showDetail, setShowDetail] = useState(false);
     const [showSubtractScreen, setShowSubtractScreen] = useState(false);
 
@@ -234,11 +237,20 @@ function SearchUser() {
         }
     };
 
-    const getPointButton = (index, point) => (
-        <LinkText onClick={() => openPointModal(index)}>
-            {NumberWithComma(point) + "AP"}
-        </LinkText>
-    );
+    const getPointButton = (index, point) => {
+        // if(permission.functionPermission)
+        if (
+            permission.functionPermissions.find(
+                (fnId) => fnId === "modify_point"
+            ) === undefined
+        )
+            return <div>{NumberWithComma(point) + "AP"}</div>;
+        return (
+            <LinkText onClick={() => openPointModal(index)}>
+                {NumberWithComma(point) + "AP"}
+            </LinkText>
+        );
+    };
 
     const getGugupackButton = (index, isGugupackUser) =>
         isGugupackUser ? (
