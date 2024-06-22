@@ -6,7 +6,11 @@ import MainContentLayout from "../../../components/Layout/MainContentLayout";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { SERVER, VALID } from "../../../constant";
-import { GetDateTime, GetPhoneNumberWithDash } from "../../../utils/utils";
+import {
+    GetDateTime,
+    GetPhoneNumberWithDash,
+    Reload,
+} from "../../../utils/utils";
 import { ADMIN_TABLE_COL } from "./table";
 import Table from "../../../components/Table/Table";
 import { LinkText } from "../../../components/Text/LinkText";
@@ -31,6 +35,7 @@ function ManageAdmin() {
     const [selectedArr, setSelectedArr] = useState([]);
 
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
     const [showModifyScreen, setShowModifyScreen] = useState(false);
 
     useEffect(() => {
@@ -172,6 +177,73 @@ function ManageAdmin() {
         }
     };
 
+    const openDeleteUserModal = async () => {
+        if (selectedArr.length === 0) {
+            alert("한개 이상의 데이터를 선택해주세요.");
+            return;
+        }
+
+        setShowDeleteUserModal(true);
+    };
+
+    const closeDeleteUserModal = () => {
+        setShowDeleteUserModal(false);
+    };
+
+    const onDeleteUser = async () => {
+        const adminList = [];
+
+        selectedArr.map((data) => {
+            adminList.push(adminData[data.index].id);
+        });
+
+        // console.log("adminList : ", adminList);
+
+        try {
+            const response = await axios.delete(SERVER + "/admin/delete", {
+                data: {
+                    adminList,
+                },
+            });
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(user);
+
+            if (result === VALID) {
+                console.log("onDeleteUser valid");
+
+                alert("유저 삭제에 성공하였습니다.");
+                Reload();
+                setSelectedArr([]);
+                closeDeleteUserModal();
+            }
+        } catch (error) {}
+    };
+
+    const DeleteUserModal = () => (
+        <Modal
+            open={openDeleteUserModal}
+            close={closeDeleteUserModal}
+            header="관리자 삭제"
+        >
+            <div style={{ color: "red", fontWeight: "600", paddingBottom: 10 }}>
+                삭제한 관리자는 모든 정보가 영구히 삭제되기 때문에
+                {"\n"}다시 복구 될 수 없습니다.
+            </div>
+            <div style={{ marginBottom: 20 }}>진행하시겠습니까?</div>
+            <DefaultButton type="button" onClick={onDeleteUser}>
+                삭제하기
+            </DefaultButton>
+        </Modal>
+    );
+
     const onModifyAdmin = async () => {
         if (selectedArr.length !== 1) {
             alert("한명의 관리자만 선택해주세요.");
@@ -218,9 +290,12 @@ function ManageAdmin() {
                             수정
                         </DefaultButton>
                         <Blank />
-                        <DefaultButton>삭제</DefaultButton>
+                        <DefaultButton onClick={openDeleteUserModal}>
+                            삭제
+                        </DefaultButton>
                     </Wrapper>
                     {showStatusModal ? <StatusModal /> : null}
+                    {showDeleteUserModal ? <DeleteUserModal /> : null}
                 </>
             </MainContentLayout>
             {showModifyScreen ? (
