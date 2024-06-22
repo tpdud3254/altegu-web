@@ -30,6 +30,16 @@ export const SUB_MENUS = {
             name: "회원정보 검색",
             route: "/search",
             element: <SearchUser />,
+            func: [
+                {
+                    id: "modify_point",
+                    name: "포인트 수정",
+                },
+                {
+                    id: "modify_recommend",
+                    name: "추천인 수정",
+                },
+            ],
         },
         {
             id: "user_management",
@@ -62,6 +72,16 @@ export const SUB_MENUS = {
             name: "작업 등록",
             route: "/regist",
             element: <RegistOrder />,
+            func: [
+                {
+                    id: "modify_price",
+                    name: "작업 금액 수정",
+                },
+                {
+                    id: "modify_push",
+                    name: "푸시알림",
+                },
+            ],
         },
     ],
     POINT: [

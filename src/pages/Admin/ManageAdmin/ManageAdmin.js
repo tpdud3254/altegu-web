@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import MainLayout from "../../../components/Layout/MainLayout";
 import PageTitle from "../../../components/PageTitle";
 import MainContentLayout from "../../../components/Layout/MainContentLayout";
-import { useForm } from "react-hook-form";
 import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { SERVER, VALID } from "../../../constant";
@@ -14,6 +13,8 @@ import { LinkText } from "../../../components/Text/LinkText";
 import { DefaultButton } from "../../../components/Button/DefaultButton";
 import { Blank } from "../../../components/Blank";
 import Modal from "../../../components/Modal";
+import DetailContentLayout from "../../../components/Layout/DetailContentLayout";
+import ModifyAdmin from "./ModifyAdmin";
 
 const Wrapper = styled.div`
     display: flex;
@@ -23,7 +24,6 @@ const Wrapper = styled.div`
 
 function ManageAdmin() {
     const location = useLocation();
-    const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
     const [adminData, setAdminData] = useState([]);
     const [adminIndex, setAdminIndex] = useState(null);
@@ -31,6 +31,7 @@ function ManageAdmin() {
     const [selectedArr, setSelectedArr] = useState([]);
 
     const [showStatusModal, setShowStatusModal] = useState(false);
+    const [showModifyScreen, setShowModifyScreen] = useState(false);
 
     useEffect(() => {
         getAdmin();
@@ -48,7 +49,7 @@ function ManageAdmin() {
             } = response;
 
             if (result === VALID) {
-                console.log(list);
+                // console.log(list);
                 setAdminData(list);
                 setTableData(getTableData(list));
             } else {
@@ -76,6 +77,21 @@ function ManageAdmin() {
         return result;
     };
 
+    const saveTableData = (index, data) => {
+        const prev = [...tableData];
+        prev[index] = {
+            phone: GetPhoneNumberWithDash(data.userId),
+            name: data.name,
+            position: data.position.position,
+            signUpDate: GetDateTime(data.createdAt),
+            idNumber: data.idNumber,
+            bankAccount: data.bank + " " + data.bankAccountNumber,
+            telecom: data.telecom.value,
+            status: getStatusButton(data.status, index),
+        };
+        setTableData([...prev]);
+    };
+
     const getStatusButton = (status, index) => {
         return status ? (
             <LinkText onClick={() => openStatusModal(index)}>활성화</LinkText>
@@ -94,42 +110,37 @@ function ManageAdmin() {
         setShowStatusModal(false);
     };
 
-    const StatusModal = () => {
-        return (
-            <Modal
-                open={openStatusModal}
-                close={closeStatusModal}
-                header="권한 수정"
-            >
-                <div style={{ fontWeight: "600", paddingBottom: 5 }}>
-                    연락처 : {adminData[adminIndex].userId}
-                </div>
-                <div style={{ fontWeight: "600", paddingBottom: 5 }}>
-                    이름 : {adminData[adminIndex].name}
-                </div>
-                <div style={{ marginTop: 20, marginBottom: 20 }}>
-                    {adminData[adminIndex].status
-                        ? "'비활성화' 상태로 변경하시겠습니까?"
-                        : "'활성화' 상태로 변경하시겠습니까?"}
-                </div>
-                <DefaultButton type="button" onClick={toggleStatus}>
-                    변경하기
-                </DefaultButton>
-            </Modal>
-        );
-    };
-    const toggleStatus = async (curStatus) => {
-        console.log("curStatus : ", adminData[adminIndex].status);
-        console.log("adminIndex : ", adminIndex);
-        console.log("admin id : ", adminData[adminIndex].id);
+    const StatusModal = () => (
+        <Modal
+            open={openStatusModal}
+            close={closeStatusModal}
+            header="권한 수정"
+        >
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                연락처 : {adminData[adminIndex].userId}
+            </div>
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                이름 : {adminData[adminIndex].name}
+            </div>
+            <div style={{ marginTop: 20, marginBottom: 20 }}>
+                {adminData[adminIndex].status
+                    ? "'비활성화' 상태로 변경하시겠습니까?"
+                    : "'활성화' 상태로 변경하시겠습니까?"}
+            </div>
+            <DefaultButton type="button" onClick={toggleStatus}>
+                변경하기
+            </DefaultButton>
+        </Modal>
+    );
 
+    const toggleStatus = async () => {
         try {
             const response = await axios.patch(SERVER + "/admin/status", {
                 status: adminData[adminIndex].status === true ? false : true,
                 adminId: adminData[adminIndex].id,
             });
 
-            console.log(response);
+            // console.log(response);
 
             const {
                 data: {
@@ -161,12 +172,38 @@ function ManageAdmin() {
         }
     };
 
+    const onModifyAdmin = async () => {
+        if (selectedArr.length !== 1) {
+            alert("한명의 관리자만 선택해주세요.");
+            return;
+        }
+
+        openModifyScreen();
+    };
+
+    const openModifyScreen = () => {
+        setAdminIndex(selectedArr[0].index);
+        setShowModifyScreen(true);
+    };
+
+    const closeModifyScreen = (result) => {
+        if (result) {
+            const prev = [...adminData];
+            prev[adminIndex] = result;
+            setAdminData([...prev]);
+
+            saveTableData(result);
+        }
+        setAdminIndex(null);
+        setShowModifyScreen(false);
+    };
+
     const columns = useMemo(() => ADMIN_TABLE_COL, []);
 
     return (
         <MainLayout path={location.pathname}>
             <PageTitle title="관리자 관리" />
-            <MainContentLayout show>
+            <MainContentLayout show={showModifyScreen ? false : true}>
                 <>
                     {tableData !== null ? (
                         <Table
@@ -177,13 +214,28 @@ function ManageAdmin() {
                         />
                     ) : null}
                     <Wrapper>
-                        <DefaultButton>수정</DefaultButton>
+                        <DefaultButton onClick={onModifyAdmin}>
+                            수정
+                        </DefaultButton>
                         <Blank />
                         <DefaultButton>삭제</DefaultButton>
                     </Wrapper>
                     {showStatusModal ? <StatusModal /> : null}
                 </>
             </MainContentLayout>
+            {showModifyScreen ? (
+                <DetailContentLayout>
+                    <ModifyAdmin
+                        onClose={closeModifyScreen}
+                        data={{
+                            ...selectedArr[0],
+                            permission: adminData[adminIndex].permission,
+                            bankAccountName:
+                                adminData[adminIndex].bankAccountName,
+                        }}
+                    />
+                </DetailContentLayout>
+            ) : null}
         </MainLayout>
     );
 }

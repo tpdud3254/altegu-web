@@ -71,6 +71,11 @@ const LoginProvider = ({ children }) => {
                 adminPermission.menuPermissions.push(MENUS[menu].id);
                 SUB_MENUS[menu].map((submenu) => {
                     adminPermission.submenuPermissions.push(submenu.id);
+                    if (submenu.func && submenu.func.length > 0) {
+                        submenu.func.map((func) => {
+                            adminPermission.funtionPermissions.push(func.id);
+                        });
+                    }
                 });
             });
 
