@@ -29,12 +29,16 @@ export const SEARCH_TABLE_COL = [
         Header: "구분",
     },
     {
+        accessor: "reservationBlock",
+        Header: "임시중지",
+    },
+    {
         accessor: "gugupack",
-        Header: "구구팩 회원",
+        Header: "구구팩",
     },
     {
         accessor: "license",
-        Header: "등록증/허가증",
+        Header: "서류",
     },
     {
         accessor: "point",

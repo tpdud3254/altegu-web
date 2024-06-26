@@ -98,6 +98,8 @@ function SearchUser() {
     const [showVehiclePermissionModal, setShowVehiclePermissionModal] =
         useState(false);
     const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+    const [showReservationBlockModal, setShowReservationBlockModal] =
+        useState(false);
 
     const [userData, setUserData] = useState([]);
     const [userIndex, setUserIndex] = useState(null);
@@ -171,6 +173,10 @@ function SearchUser() {
                         : value.membership
                         ? GetUserType(value.userTypeId) + " (정회원)"
                         : GetUserType(value.userTypeId),
+                reservationBlock:
+                    value.userTypeId === 2
+                        ? getReservationBlock(value.reservationBlock, index)
+                        : null,
                 license:
                     value.userTypeId === 1 ? "-" : getLicense(index, value),
                 point: value.point
@@ -185,6 +191,20 @@ function SearchUser() {
         });
         return result;
     };
+
+    const getReservationBlock = (block, index) => (
+        <div
+            onClick={() => openReservationBlock(index)}
+            style={{
+                textDecoration: "underline",
+                fontWeight: block ? 600 : 400,
+                color: block ? "red" : "green",
+                cursor: "pointer",
+            }}
+        >
+            {block ? "임시중지" : "정상"}
+        </div>
+    );
 
     const getSelectedUsers = async () => {
         const result = [];
@@ -212,7 +232,7 @@ function SearchUser() {
                                 <LinkText
                                     onClick={() => openLicenseModal(index)}
                                 >
-                                    {value.license ? "사업자등록증" : null}
+                                    {value.license ? "등록증" : null}
                                 </LinkText>
                             </div>
                             <LinkText
@@ -220,9 +240,7 @@ function SearchUser() {
                                     openVehiclePermissionModal(index)
                                 }
                             >
-                                {value.vehiclePermission
-                                    ? "화물자동차운송허가증"
-                                    : null}
+                                {value.vehiclePermission ? "허가증" : null}
                             </LinkText>
                         </div>
                     )}
@@ -231,7 +249,7 @@ function SearchUser() {
         } else {
             return (
                 <LinkText onClick={() => openLicenseModal(index)}>
-                    {value.license ? "사업자등록증" : null}
+                    {value.license ? "등록증" : null}
                 </LinkText>
             );
         }
@@ -258,6 +276,80 @@ function SearchUser() {
         ) : (
             ""
         );
+
+    const closeReservationBlockModal = () => {
+        setUserIndex(null);
+        setShowReservationBlockModal(false);
+    };
+
+    const openReservationBlock = (index) => {
+        setUserIndex(index);
+        setShowReservationBlockModal(true);
+    };
+
+    const ReservationBlockModal = () => (
+        <Modal
+            open={openReservationBlock}
+            close={closeReservationBlockModal}
+            header="임시중지 여부 수정"
+        >
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                회원코드 : {userData[userIndex].id}
+            </div>
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                이름 : {userData[userIndex].name}
+            </div>
+            <div style={{ fontWeight: "600", paddingBottom: 5 }}>
+                연락처 : {userData[userIndex].phone}
+            </div>
+            <div style={{ marginTop: 20, marginBottom: 20 }}>
+                {userData[userIndex].reservationBlock
+                    ? "'정상' 상태로 변경하시겠습니까?"
+                    : "'이용중지' 상태로 변경하시겠습니까?"}
+            </div>
+            <DefaultButton type="button" onClick={onSetReservationBlock}>
+                변경하기
+            </DefaultButton>
+        </Modal>
+    );
+
+    const onSetReservationBlock = async () => {
+        const userId = userData[userIndex].id;
+
+        console.log(userId);
+
+        try {
+            const response = await axios.patch(SERVER + "/admin/user/block", {
+                id: userId,
+                blockStatus: userData[userIndex].reservationBlock
+                    ? false
+                    : true,
+            });
+
+            const {
+                data: {
+                    data: { user },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            console.log(user);
+
+            if (result === VALID) {
+                console.log("onSetReservationBlock valid");
+                Reload();
+                setUserIndex(null);
+                closeReservationBlockModal();
+            } else {
+                console.log("onSetReservationBlock invalid");
+                alert("임시중지 상태 변경에 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("임시중지 상태 변경에 실패하였습니다.");
+            console.log("onSetReservationBlock error : ", error);
+        }
+    };
 
     const openDetail = (index) => {
         setShowDetail(true);
@@ -993,7 +1085,7 @@ function SearchUser() {
                                         <td>
                                             <input
                                                 {...register("phone")}
-                                                placeholder="숫자만 입력"
+                                                placeholder="숫자만 입력 (일부검색가능)"
                                             />
                                         </td>
                                         <th>성별</th>
@@ -1212,6 +1304,9 @@ function SearchUser() {
                         ) : null}
                         {showDeleteUserModal ? <DeleteUserModal /> : null}
                         {showGugupackModal ? <GugupackModal /> : null}
+                        {showReservationBlockModal ? (
+                            <ReservationBlockModal />
+                        ) : null}
                     </>
                 </form>
             </MainContentLayout>
