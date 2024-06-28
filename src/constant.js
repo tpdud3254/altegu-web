@@ -28,6 +28,19 @@ export const USER_TYPE_TEXT = {
     company: "기업",
 };
 
+export const VEHICLE_TYPE = {
+    all: 0,
+    ladder: 1,
+    sky: 2,
+    crane: 3,
+};
+
+export const VEHICLE_TYPE_TEXT = {
+    all: "전체",
+    ladder: "사다리",
+    sky: "스카이",
+    crane: "크레인",
+};
 export const POINT_STATUS = {
     none: "선택",
     charge: "충전",

@@ -24,6 +24,8 @@ import {
     GUGUPACK_STATUS,
     POINT_STATUS,
     POINT_BRAKEDOWN_TEXT,
+    VEHICLE_TYPE,
+    VEHICLE_TYPE_TEXT,
 } from "../../../constant";
 import {
     GetUserType,
@@ -165,14 +167,7 @@ function SearchUser() {
                 age: GetAge(value.birth),
                 gender: value.gender,
                 phone: value.phone,
-                userType:
-                    value.userTypeId === 3
-                        ? GetUserType(value.userTypeId) +
-                          ">" +
-                          value.workCategory?.name
-                        : value.membership
-                        ? GetUserType(value.userTypeId) + " (정회원)"
-                        : GetUserType(value.userTypeId),
+                userType: getUserType(value),
                 reservationBlock:
                     value.userTypeId === 2
                         ? getReservationBlock(value.reservationBlock, index)
@@ -190,6 +185,34 @@ function SearchUser() {
             });
         });
         return result;
+    };
+
+    const getUserType = (value) => {
+        return value.userTypeId === 1 ? (
+            GetUserType(value.userTypeId)
+        ) : value.userTypeId === 2 ? (
+            <div>
+                {GetUserType(value.userTypeId)}
+                {value?.vehicle?.length > 0 ? (
+                    <div>
+                        {"("}
+                        {value?.vehicle[0]?.vehicleTypeId === 3
+                            ? value?.vehicle[0]?.craneType.type || ""
+                            : value?.vehicle[0]?.type?.type || ""}
+                        {" / "}
+                        {value?.vehicle[0]?.vehicleTypeId === 1
+                            ? value?.vehicle[0]?.floor.floor || ""
+                            : value?.vehicle[0]?.vehicleTypeId === 2
+                            ? value?.vehicle[0]?.weight.weight || ""
+                            : value?.vehicle[0]?.vehicleCraneWeight.weight + ""}
+                        {")"}
+                    </div>
+                ) : null}
+                {value.membership ? <div>(정회원)</div> : null}
+            </div>
+        ) : (
+            GetUserType(value.userTypeId) + ">" + value.workCategory?.name
+        );
     };
 
     const getReservationBlock = (block, index) => (
@@ -1024,6 +1047,7 @@ function SearchUser() {
             phone,
             status,
             userType,
+            vehicleType,
             workCategory,
             gugupackStatus,
         } = data;
@@ -1042,6 +1066,8 @@ function SearchUser() {
             endDate: originalEndDate ? endDate : null,
             status: STATUS[status],
             userTypeId: USER_TYPE[userType],
+            vehicleTypeId:
+                USER_TYPE[userType] === 2 ? VEHICLE_TYPE[vehicleType] : null,
             workCategoryId:
                 USER_TYPE[userType] === 3 ? WORK_CATEGORY[workCategory] : null,
             gugupackStatus:
@@ -1225,6 +1251,27 @@ function SearchUser() {
                                                                 : WORK_CATEGORY_TEXT[
                                                                       value
                                                                   ]}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            ) : null}
+                                            {watch("userType") === "driver" ? (
+                                                <select
+                                                    name="vehicleType"
+                                                    {...register("vehicleType")}
+                                                >
+                                                    {Object.keys(
+                                                        VEHICLE_TYPE
+                                                    ).map((value, index) => (
+                                                        <option
+                                                            value={value}
+                                                            key={index}
+                                                        >
+                                                            {
+                                                                VEHICLE_TYPE_TEXT[
+                                                                    value
+                                                                ]
+                                                            }
                                                         </option>
                                                     ))}
                                                 </select>

@@ -16,6 +16,7 @@ import {
     GetCalendarDateText,
     GetDateTime,
     GetPhoneNumberWithDash,
+    GetUserType,
     NumberWithComma,
     Reload,
     Reset,
@@ -151,7 +152,7 @@ function ManageMembership() {
                 age: GetAge(value.birth),
                 gender: value.gender,
                 phone: GetPhoneNumberWithDash(value.phone),
-                userType: "기사",
+                userType: getUserType(value),
                 reservationBlock: getReservationBlock(
                     value.reservationBlock,
                     index
@@ -166,6 +167,29 @@ function ManageMembership() {
             });
         });
         return result;
+    };
+
+    const getUserType = (value) => {
+        return (
+            <div>
+                {GetUserType(value.userTypeId)}
+                {value?.vehicle?.length > 0 ? (
+                    <div>
+                        {"("}
+                        {value?.vehicle[0]?.vehicleTypeId === 3
+                            ? value?.vehicle[0]?.craneType.type || ""
+                            : value?.vehicle[0]?.type?.type || ""}
+                        {" / "}
+                        {value?.vehicle[0]?.vehicleTypeId === 1
+                            ? value?.vehicle[0]?.floor.floor || ""
+                            : value?.vehicle[0]?.vehicleTypeId === 2
+                            ? value?.vehicle[0]?.weight.weight || ""
+                            : value?.vehicle[0]?.vehicleCraneWeight.weight + ""}
+                        {")"}
+                    </div>
+                ) : null}
+            </div>
+        );
     };
 
     const getReservationBlock = (block, index) => (
