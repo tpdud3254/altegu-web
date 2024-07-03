@@ -410,7 +410,11 @@ function UserDetails({ data, onClose }) {
                                                   ? userData.vehicle[0].weight
                                                         .weight
                                                   : userData.vehicle[0].floor
-                                                        .floor)}
+                                                  ? userData.vehicle[0].floor
+                                                        .floor
+                                                  : userData.vehicle[0]
+                                                        .vehicleCraneWeight
+                                                        .weight)}
                                     </td>
                                 </tr>
                                 <tr>
