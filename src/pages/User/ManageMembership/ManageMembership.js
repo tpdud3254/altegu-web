@@ -98,6 +98,7 @@ function ManageMembership() {
         getUsers();
     }, []);
 
+    //BUG: 정회원 기사회원 검색하는거도 이상하고 조건에 맞으면 vehicle 데이터가 조회가 안되는 현상
     const getUsers = async (data) => {
         try {
             const response = await axios.get(SERVER + "/admin/users", {
@@ -177,14 +178,15 @@ function ManageMembership() {
                     <div>
                         {"("}
                         {value?.vehicle[0]?.vehicleTypeId === 3
-                            ? value?.vehicle[0]?.craneType.type || ""
+                            ? value?.vehicle[0]?.craneType?.type || ""
                             : value?.vehicle[0]?.type?.type || ""}
                         {" / "}
                         {value?.vehicle[0]?.vehicleTypeId === 1
-                            ? value?.vehicle[0]?.floor.floor || ""
+                            ? value?.vehicle[0]?.floor?.floor || ""
                             : value?.vehicle[0]?.vehicleTypeId === 2
-                            ? value?.vehicle[0]?.weight.weight || ""
-                            : value?.vehicle[0]?.vehicleCraneWeight.weight + ""}
+                            ? value?.vehicle[0]?.weight?.weight || ""
+                            : value?.vehicle[0]?.vehicleCraneWeight?.weight +
+                              ""}
                         {")"}
                     </div>
                 ) : null}
@@ -209,16 +211,47 @@ function ManageMembership() {
     const getStatus = (membership, status, id) => {
         if (membership)
             return (
-                <LinkText onClick={() => setMembership(id)}>정회원</LinkText>
+                <LinkText onClick={() => cancelMembership(id)}>정회원</LinkText>
             );
-        else if (status === "정상") return "기사회원";
+        else if (status === "정상")
+            return (
+                <LinkText onClick={() => confirmMembership(id)}>
+                    기사회원
+                </LinkText>
+            );
         else return status;
     };
 
-    const setMembership = async (id) => {
+    const cancelMembership = async (id) => {
         try {
             const response = await axios.patch(
                 SERVER + "/admin/users/membership/cancel",
+                {
+                    id,
+                }
+            );
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                alert("정회원 수정에 성공하였습니다.");
+                getMembershipUsers();
+            } else {
+                alert("정회원 수정에 실패하였습니다.");
+            }
+        } catch (error) {
+            alert("정회원 수정에 실패하였습니다.");
+
+            console.log("error : ", error);
+        }
+    };
+
+    const confirmMembership = async (id) => {
+        try {
+            const response = await axios.patch(
+                SERVER + "/admin/users/membership/confirm",
                 {
                     id,
                 }
@@ -610,6 +643,9 @@ function ManageMembership() {
                 ? membershipEndDate
                 : null,
             status: MEMBERSHIP_STATUS[status],
+            // ...(status === "membership" || status === "normal"
+            //     ? { membership: status }
+            //     : { status: MEMBERSHIP_STATUS[status] || null }),
             region: region ? region : null,
         };
 
