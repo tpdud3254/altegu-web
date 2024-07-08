@@ -115,7 +115,7 @@ function Commission() {
                                         <thead></thead>
                                         <tbody>
                                             {commission.map((value, index) => (
-                                                <tr>
+                                                <tr key={index}>
                                                     <th style={{ width: 200 }}>
                                                         {value.description}
                                                     </th>
