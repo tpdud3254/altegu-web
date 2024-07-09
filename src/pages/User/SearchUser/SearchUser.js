@@ -108,6 +108,7 @@ function SearchUser() {
     const [tableData, setTableData] = useState(null);
     const [selectedArr, setSelectedArr] = useState([]);
     const [subtractUsers, setSubtractUsers] = useState([]);
+    const [remitUserData, setRemitUserData] = useState(null);
 
     const [processing, setProcessing] = useState(false);
 
@@ -456,15 +457,6 @@ function SearchUser() {
                         </td>
                     </tr>
                     <tr>
-                        <th>금액</th>
-                        <td>
-                            <input
-                                type="number"
-                                {...register("point", "0")}
-                            ></input>
-                        </td>
-                    </tr>
-                    <tr>
                         <th>종류</th>
                         <td>
                             <select
@@ -483,10 +475,60 @@ function SearchUser() {
                             </select>
                         </td>
                     </tr>
+                    {watch("pointStatus") === "remit" ? (
+                        <tr>
+                            <th>받는사람 핸드폰번호</th>
+                            <td>
+                                <input
+                                    disabled={remitUserData}
+                                    placeholder="-를 제외한 숫자 입력"
+                                    type="number"
+                                    {...register("remitUserPhone")}
+                                ></input>
+                                <Blank />
+                                {!remitUserData ? (
+                                    <DefaultButton onClick={checkUser}>
+                                        검색
+                                    </DefaultButton>
+                                ) : (
+                                    <DefaultButton
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setRemitUserData(null);
+                                            setValue("remitUserPhone", "");
+                                        }}
+                                    >
+                                        수정
+                                    </DefaultButton>
+                                )}
+                                <Blank />
+                                {remitUserData && (
+                                    <span>
+                                        이름 : {remitUserData?.name || ""}(
+                                        {remitUserData?.userType || ""}){" / "}
+                                        휴대폰 번호 :{" "}
+                                        {remitUserData?.phone || ""}
+                                    </span>
+                                )}
+                            </td>
+                        </tr>
+                    ) : null}
+
+                    <tr>
+                        <th>금액</th>
+                        <td>
+                            <input
+                                type="number"
+                                {...register("point", "0")}
+                            ></input>
+                        </td>
+                    </tr>
+
                     <tr>
                         <th>내역</th>
                         <td>
                             <select
+                                disabled={watch("pointStatus") === "remit"}
                                 name="pointsData"
                                 {...register("pointsData", "0")}
                             >
@@ -910,6 +952,11 @@ function SearchUser() {
     const onModifyPoint = async () => {
         const { point, pointStatus, pointsData, pointsText } = getValues();
 
+        if (pointStatus === "remit") {
+            onRemitPoint();
+            return;
+        }
+
         console.log("modify point : ", point);
         console.log("modify pointStatus : ", pointStatus);
         console.log("modify pointsData : ", pointsData);
@@ -985,6 +1032,119 @@ function SearchUser() {
         }
     };
 
+    const checkUser = async (e) => {
+        e.preventDefault();
+        const { remitUserPhone } = getValues();
+
+        console.log(remitUserPhone);
+        try {
+            const response = await axios.get(SERVER + "/admin/user/phone", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+                params: { phone: remitUserPhone },
+            });
+
+            const {
+                data: { data, result },
+            } = response;
+
+            if (result === VALID) {
+                setRemitUserData({
+                    phone: data.user.phone,
+                    name: data.user.name,
+                    userType:
+                        data.user.userTypeId === 1
+                            ? "일반회원"
+                            : data.user.userTypeId === 2
+                            ? "기사회원"
+                            : "기업회원",
+                });
+            } else {
+                setRemitUserData({});
+            }
+
+            console.log(data);
+        } catch (error) {
+            setRemitUserData({});
+        }
+    };
+
+    const onRemitPoint = async () => {
+        const { point, pointStatus, remitUserPhone } = getValues();
+
+        console.log("modify point : ", point);
+        console.log("modify pointStatus : ", pointStatus);
+        console.log("modify remitUserPhone : ", remitUserPhone);
+
+        if (!remitUserData) {
+            alert("유저를 입력하세요.");
+            return;
+        }
+        if (!point || point.length === 0 || Number(point) === 0) {
+            alert("금액을 입력하세요.");
+            return;
+        }
+
+        if (
+            !pointStatus ||
+            pointStatus.length === 0 ||
+            pointStatus === "none"
+        ) {
+            alert("종류를 선택하세요.");
+            return;
+        }
+
+        if (
+            Number.parseInt(userData[userIndex].point.curPoint) -
+                Number.parseInt(point) <
+            0
+        ) {
+            alert("송금할 포인트가 부족합니다.");
+            return;
+        }
+        try {
+            const response = await axios.patch(SERVER + "/admin/points/remit", {
+                pointId: userData[userIndex].point.id,
+                curPoint: Number.parseInt(userData[userIndex].point.curPoint),
+                remitPoint: Number.parseInt(point),
+                type: pointStatus,
+                remitUserPhone: remitUserPhone,
+            });
+
+            const {
+                data: {
+                    data: { points },
+                    result,
+                    msg,
+                },
+            } = response;
+
+            if (result === VALID) {
+                console.log("onModifyPoint valid");
+                console.log(points);
+                // const prev1 = [...tableData];
+                // prev1[userIndex].point = getPointButton(
+                //     userIndex,
+                //     points.curPoint
+                // );
+                // setTableData([...prev1]);
+
+                // const prev2 = [...userData];
+                // prev2[userIndex].point.curPoint = points.curPoint;
+                // setUserData([...prev2]);
+                Reload();
+                closePointModal();
+                alert("포인트 변경 및 내역 추가가 완료되었습니다.");
+            } else {
+                console.log("onModifyPoint invalid");
+                alert("포인트 변경 및 내역 추가에 실패하였습니다.");
+            }
+        } catch (error) {
+            console.log("onModifyPoint error : ", error);
+            alert("포인트 변경 및 내역 추가에 실패하였습니다.");
+        }
+    };
     const onUnsubscribeGugupack = async () => {
         try {
             const response = await axios.post(
