@@ -1,5 +1,5 @@
-// export const SERVER = process.env.REACT_APP_SERVER;
-export const SERVER = "http://localhost:4000";
+export const SERVER = process.env.REACT_APP_SERVER;
+// export const SERVER = "http://localhost:4000";
 export const VALID = "VALID";
 
 export const GENDER = { all: null, male: "남", female: "여" };
@@ -47,6 +47,7 @@ export const POINT_STATUS = {
     withdrawal: "출금",
     add: "지급",
     subtract: "차감",
+    remit: "송금",
 };
 
 export const POINT_BRAKEDOWN_TEXT = {
