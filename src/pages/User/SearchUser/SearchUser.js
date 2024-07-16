@@ -88,7 +88,7 @@ function SearchUser() {
     const location = useLocation();
     const { register, handleSubmit, setValue, watch, getValues } = useForm();
 
-    const { permission } = useContext(LoginContext);
+    const { adminInfo, permission } = useContext(LoginContext);
     const [showDetail, setShowDetail] = useState(false);
     const [showSubtractScreen, setShowSubtractScreen] = useState(false);
 
@@ -127,7 +127,15 @@ function SearchUser() {
                 headers: {
                     "ngrok-skip-browser-warning": true,
                 },
-                ...(data && { params: { ...data } }),
+                params: {
+                    ...(data && { ...data }),
+                    ...(permission.functionPermissions.find(
+                        (fnId) => fnId === "user_list"
+                    ) === undefined && {
+                        requestAdminId: adminInfo.id,
+                        requestAdminPhone: adminInfo.userId,
+                    }),
+                },
             });
 
             const {

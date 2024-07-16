@@ -32,6 +32,10 @@ export const SUB_MENUS = {
             element: <SearchUser />,
             func: [
                 {
+                    id: "user_list",
+                    name: "회원 전체 조회",
+                },
+                {
                     id: "modify_point",
                     name: "포인트 수정",
                 },
