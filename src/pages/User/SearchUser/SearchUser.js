@@ -116,10 +116,12 @@ function SearchUser() {
     const vehiclePermissionRef = useRef();
 
     useEffect(() => {
-        register("originalStartDate");
-        register("originalEndDate");
-        getUsers();
-    }, []);
+        if (permission) {
+            register("originalStartDate");
+            register("originalEndDate");
+            getUsers();
+        }
+    }, [permission]);
 
     const getUsers = async (data) => {
         try {
