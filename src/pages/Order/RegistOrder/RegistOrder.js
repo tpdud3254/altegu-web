@@ -826,7 +826,7 @@ function RegistOrder() {
             usePoint,
             orderPrice,
             totalPrice,
-            tax,
+            tax: paymentType !== 0 ? 0 : tax,
             finalPrice,
             gugupackPrice,
             method: "admin_order",
