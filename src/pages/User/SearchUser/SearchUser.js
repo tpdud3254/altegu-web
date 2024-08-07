@@ -109,6 +109,12 @@ function SearchUser() {
     const [selectedArr, setSelectedArr] = useState([]);
     const [subtractUsers, setSubtractUsers] = useState([]);
     const [remitUserData, setRemitUserData] = useState(null);
+    const [regionData, setRegionData] = useState([
+        {
+            value: "all",
+            label: "전체",
+        },
+    ]);
 
     const [processing, setProcessing] = useState(false);
 
@@ -120,6 +126,7 @@ function SearchUser() {
             register("originalStartDate");
             register("originalEndDate");
             getUsers();
+            getRegion();
         }
     }, [permission]);
 
@@ -154,6 +161,47 @@ function SearchUser() {
 
                 setUserData(users);
                 setTableData(getTableData(users));
+            } else {
+                const {
+                    data: { msg },
+                } = response;
+
+                console.log("getUsers invalid");
+                setUserData([]);
+            }
+        } catch (error) {
+            console.log("getUsers error : ", error);
+        }
+    };
+
+    const getRegion = async (data) => {
+        try {
+            const response = await axios.get(SERVER + "/admin/region", {
+                headers: {
+                    "ngrok-skip-browser-warning": true,
+                },
+            });
+
+            const {
+                data: { result },
+            } = response;
+
+            if (result === VALID) {
+                const {
+                    data: {
+                        data: { regoin },
+                    },
+                } = response;
+                console.log("getRegion valid : ", regoin);
+
+                const arr = [];
+                regoin.map((v) => {
+                    arr.push({ value: v.id, label: v.region });
+                });
+
+                setRegionData([...regionData, ...arr]);
+                // setUserData(users);
+                // setTableData(getTableData(users));
             } else {
                 const {
                     data: { msg },
@@ -1220,8 +1268,10 @@ function SearchUser() {
             vehicleType,
             workCategory,
             gugupackStatus,
+            region,
         } = data;
 
+        console.log("region : ", region);
         const startDate = new Date(originalStartDate);
         const endDate = new Date(originalEndDate);
 
@@ -1244,6 +1294,7 @@ function SearchUser() {
                 gugupackStatus && gugupackStatus !== "all"
                     ? gugupackStatus
                     : null,
+            region: region ? region : null,
         };
 
         console.log("sendData : ", sendData);
@@ -1469,6 +1520,28 @@ function SearchUser() {
                                                 ))}
                                             </select>
                                         </td>
+                                    </tr>
+                                    <tr>
+                                        <th>지역</th>
+                                        <td>
+                                            <select
+                                                name="region"
+                                                {...register("region")}
+                                            >
+                                                {regionData?.map(
+                                                    (value, index) => (
+                                                        <option
+                                                            value={value.value}
+                                                            key={index}
+                                                        >
+                                                            {value.label}
+                                                        </option>
+                                                    )
+                                                )}
+                                            </select>
+                                        </td>
+                                        <th></th>
+                                        <td></td>
                                     </tr>
                                 </tbody>
                             </HorizontalTable>
