@@ -754,7 +754,7 @@ function RegistOrder() {
         const usePoint = 0;
         const orderPrice = price + emergencyPrice - gugupackPrice;
         const totalPrice = orderPrice - usePoint;
-        const tax = orderPrice * 0.1;
+        const tax = paymentType !== 0 ? 0 : orderPrice * 0.1;
         const finalPrice = totalPrice + tax;
 
         const sendData = {
@@ -826,7 +826,7 @@ function RegistOrder() {
             usePoint,
             orderPrice,
             totalPrice,
-            tax: paymentType !== 0 ? 0 : tax,
+            tax,
             finalPrice,
             gugupackPrice,
             method: "admin_order",
